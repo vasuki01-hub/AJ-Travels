@@ -1,5 +1,769 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A J Travels - Inquiry Portal</title>
+    <meta name="description" content="Professional travel inquiry and booking management portal for A J Travels">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --background:hsl(210,20%,98%);--foreground:hsl(215,25%,15%);
+            --card:hsl(0,0%,100%);--card-foreground:hsl(215,25%,15%);
+            --primary:hsl(200,95%,42%);--primary-foreground:hsl(0,0%,100%);
+            --secondary:hsl(210,30%,92%);--secondary-foreground:hsl(215,25%,15%);
+            --muted:hsl(210,30%,94%);--muted-foreground:hsl(215,16%,45%);
+            --accent:hsl(185,85%,50%);--accent-foreground:hsl(0,0%,100%);
+            --destructive:hsl(0,72%,51%);--destructive-foreground:hsl(0,0%,100%);
+            --success:hsl(142,76%,36%);--success-foreground:hsl(0,0%,100%);
+            --warning:hsl(38,92%,50%);--warning-foreground:hsl(0,0%,100%);
+            --border:hsl(210,30%,88%);--input:hsl(210,30%,90%);--ring:hsl(200,95%,42%)
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:var(--background);color:var(--foreground);line-height:1.6}
+        .hidden{display:none!important}
+        .app-container{display:flex;height:100vh}
+        .sidebar{width:256px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .3s ease}
+        .sidebar-header{display:flex;align-items:center;gap:8px;padding:24px;border-bottom:1px solid var(--border)}
+        .sidebar-logo{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:var(--primary-foreground);font-weight:bold;font-size:14px;overflow:hidden}
+        .sidebar-title h2{font-size:18px;font-weight:bold}
+        .sidebar-title p{font-size:12px;color:var(--muted-foreground)}
+        .sidebar-nav{flex:1;padding:16px}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;color:var(--foreground);font-weight:500;transition:all .2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:4px}
+        .nav-item:hover{background:var(--secondary)}
+        .nav-item.active{background:var(--primary);color:var(--primary-foreground)}
+        .sidebar-footer{padding:16px;border-top:1px solid var(--border)}
+        .user-info{padding:12px;border-radius:8px;background:var(--secondary);margin-bottom:12px}
+        .user-info p{font-size:14px;font-weight:500}
+        .user-info small{font-size:12px;color:var(--muted-foreground)}
+        .user-role{font-size:12px;color:var(--accent);text-transform:capitalize;margin-top:4px}
+        .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+        .header{height:64px;border-bottom:1px solid var(--border);background:var(--card);padding:0 24px;display:flex;align-items:center;gap:16px}
+        .header h1{font-size:20px;font-weight:bold}
+        .content{flex:1;overflow-y:auto;padding:24px}
+        .btn{padding:8px 16px;border-radius:8px;border:none;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;font-size:14px}
+        .btn-primary{background:var(--primary);color:var(--primary-foreground)}
+        .btn-primary:hover{opacity:.9}
+        .btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--foreground)}
+        .btn-ghost{background:transparent;color:var(--foreground)}
+        .btn-ghost:hover{background:var(--secondary)}
+        .btn-icon{padding:8px;width:36px;height:36px}
+        .btn-sm{padding:4px 8px;font-size:12px}
+        .w-full{width:100%}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+        .card-header{padding:16px 24px;border-bottom:1px solid var(--border)}
+        .card-header-flex{display:flex;justify-content:space-between;align-items:center}
+        .card-title{font-size:18px;font-weight:600}
+        .card-description{font-size:14px;color:var(--muted-foreground);margin-top:4px}
+        .card-content{padding:24px}
+        .form-group{margin-bottom:16px}
+        .form-label{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+        .form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--background);font-size:14px}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px hsla(200,95%,42%,.1)}
+        .form-textarea{min-height:100px;resize:vertical}
+        .grid{display:grid;gap:16px}
+        .grid-cols-2{grid-template-columns:repeat(2,1fr)}
+        .grid-cols-3{grid-template-columns:repeat(3,1fr)}
+        .grid-cols-4{grid-template-columns:repeat(4,1fr)}
+        .table-container{overflow-x:auto}
+        .table{width:100%;border-collapse:collapse;font-size:14px}
+        .table th{text-align:left;padding:12px;background:var(--muted);font-weight:600;color:var(--muted-foreground);border-bottom:1px solid var(--border)}
+        .table td{padding:12px;border-bottom:1px solid var(--border)}
+        .table tr:hover{background:hsla(210,30%,94%,.5)}
+        .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500}
+        .badge-success{background:hsla(142,76%,36%,.1);color:var(--success)}
+        .badge-warning{background:hsla(38,92%,50%,.1);color:var(--warning)}
+        .badge-destructive{background:hsla(0,72%,51%,.1);color:var(--destructive)}
+        .badge-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+        .metric-card{padding:20px;text-align:center}
+        .metric-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;color:var(--muted-foreground)}
+        .metric-card-title{font-weight:500}
+        .metric-value{font-size:32px;font-weight:bold;margin-bottom:4px}
+        .metric-label{font-size:12px;color:var(--muted-foreground)}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+        .modal{background:var(--card);border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,.1)}
+        .modal-header{padding:24px 24px 16px;border-bottom:1px solid var(--border)}
+        .modal-title{font-size:20px;font-weight:600}
+        .modal-description{font-size:14px;color:var(--muted-foreground);margin-top:4px}
+        .modal-content{padding:24px}
+        .flex{display:flex}
+        .flex-col{flex-direction:column}
+        .items-center{align-items:center}
+        .justify-between{justify-content:space-between}
+        .gap-1{gap:4px}
+        .gap-2{gap:8px}
+        .gap-3{gap:12px}
+        .gap-4{gap:16px}
+        .space-y-4 > * + *{margin-top:16px}
+        .space-y-6 > * + *{margin-top:24px}
+        .mt-4{margin-top:16px}
+        .mb-4{margin-bottom:16px}
+        .text-center{text-align:center}
+        .font-mono{font-family:monospace}
+        .login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,hsla(200,95%,42%,.1),var(--background),hsla(185,85%,50%,.1));padding:16px}
+        .login-card{max-width:400px;width:100%}
+        .login-logo{width:64px;height:64px;margin:0 auto 16px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:var(--primary-foreground);font-size:32px;font-weight:bold}
+        .login-header{text-align:center;margin-bottom:24px}
+        .demo-credentials{margin-top:24px;padding:16px;background:var(--muted);border-radius:8px}
+        .demo-credentials p{font-size:12px;color:var(--muted-foreground);margin:4px 0}
+        .demo-credentials p:first-child{font-weight:500;margin-bottom:8px}
+        .toast-container{position:fixed;top:16px;right:16px;z-index:2000}
+        .toast{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);min-width:300px;animation:slideIn .3s ease}
+        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        .toast-title{font-weight:600;margin-bottom:4px}
+        .toast-description{font-size:14px;color:var(--muted-foreground)}
+        .toast.error{border-color:var(--destructive)}
+        .toast.error .toast-title{color:var(--destructive)}
+        .chart-container{position:relative;height:300px;margin-top:16px}
+        .mobile-menu-btn{display:none}
+        @media(max-width:1024px){
+            .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .mobile-menu-btn{display:block}
+            .sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
+        }
+        .actions-flex{display:flex;flex-wrap:wrap;gap:12px}
+        .search-box{position:relative}
+        .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-foreground)}
+        .search-box input{padding-left:36px}
+        .info-box{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:8px;background:hsla(210,30%,94%,.5)}
+        .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:14px}
+        .info-grid div{padding:4px 0}
+        .summary-box{margin-top:16px;padding:16px;background:var(--muted);border-radius:8px}
+        .summary-box p{font-size:14px;color:var(--muted-foreground);margin:4px 0}
+        .summary-box span{font-weight:600;color:var(--foreground)}
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- storage.js ---------- */
+const Storage = {
+    INQUIRIES_KEY: 'ajTravelsInquiries',
+    BOOKINGS_KEY: 'ajTravelsBookings',
+    EMPLOYEES_KEY: 'ajTravelsEmployees',
+
+    initializeDemoData() {
+        if (!localStorage.getItem(this.INQUIRIES_KEY)) {
+            const demoInquiries = [
+                { id: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryFor: 'Tickets', description: 'Need tickets to London', destination: 'London', travelDate: '2025-12-15', status: 'Under Process', inquiryDate: new Date().toISOString(), employeeId: '2', employeeName: 'Employee User' },
+                { id: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryFor: 'Tour Package', description: 'Family vacation package to Dubai', destination: 'Dubai', travelDate: '2025-11-20', status: 'Successful', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), employeeId: '2', employeeName: 'Employee User' }
+            ];
+            localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(demoInquiries));
+        }
+        if (!localStorage.getItem(this.BOOKINGS_KEY)) {
+            const demoBookings = [
+                { id: 'BK001', inquiryId: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), invoiceNumber: 'INV-2025-001', airlinePNR: 'ABC123', gdsPNR: 'GDS456', bookingDetails: '2 Adults, 1 Child - Dubai Premium Package', paymentStatus: 'Successful', amount: 3500, currency: 'USD', paymentMode: 'Card', employeeId: '2', employeeName: 'Employee User', destination: 'Dubai', travelDate: '2025-11-20' }
+            ];
+            localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(demoBookings));
+        }
+        if (!localStorage.getItem(this.EMPLOYEES_KEY)) {
+            const demoEmployees = [
+                { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin' },
+                { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee' }
+            ];
+            localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(demoEmployees));
+        }
+    },
+
+    getInquiries() { this.initializeDemoData(); const d = localStorage.getItem(this.INQUIRIES_KEY); return d ? JSON.parse(d) : []; },
+    saveInquiry(i) { const a = this.getInquiries(); const idx = a.findIndex(x=>x.id===i.id); idx>=0?a[idx]=i:a.push(i); localStorage.setItem(this.INQUIRIES_KEY,JSON.stringify(a)); },
+    deleteInquiry(id) { let a = this.getInquiries(); a = a.filter(x => x.id !== id); localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(a)); },
+    getBookings() { this.initializeDemoData(); const d = localStorage.getItem(this.BOOKINGS_KEY); return d ? JSON.parse(d) : []; },
+    saveBooking(b) { const a = this.getBookings(); const idx = a.findIndex(x=>x.id===b.id); idx>=0?a[idx]=b:a.push(b); localStorage.setItem(this.BOOKINGS_KEY,JSON.stringify(a)); },
+    getEmployees() { this.initializeDemoData(); const d = localStorage.getItem(this.EMPLOYEES_KEY); return d ? JSON.parse(d) : []; },
+    saveEmployee(e) { const a = this.getEmployees(); const idx = a.findIndex(x=>x.id===e.id); idx>=0?a[idx]=e:a.push(e); localStorage.setItem(this.EMPLOYEES_KEY,JSON.stringify(a)); }
+};
+
+/* ---------- auth.js ---------- */
+const Auth = {
+    USER_KEY: 'ajTravelsUser', currentUser: null,
+    init() { const s = localStorage.getItem(this.USER_KEY); if(s) this.currentUser = JSON.parse(s); },
+    login(email,password){
+        const demo = {
+            'admin@ajtravels.com': {id:'1',name:'Admin User',email:'admin@ajtravels.com',role:'admin'},
+            'employee@ajtravels.com': {id:'2',name:'Employee User',email:'employee@ajtravels.com',role:'employee'}
+        };
+        if(demo[email] && password==='password'){
+            this.currentUser = demo[email];
+            localStorage.setItem(this.USER_KEY,JSON.stringify(this.currentUser));
+            return {success:true};
+        }
+        return {success:false,error:'Invalid credentials'};
+    },
+    logout(){ this.currentUser=null; localStorage.removeItem(this.USER_KEY); },
+    isAuthenticated(){ return this.currentUser!==null; },
+    getUser(){ return this.currentUser; }
+};
+Auth.init();
+
+/* ---------- common.js ---------- */
+const Utils = {
+    showToast(title,desc,type='success'){
+        const c = document.querySelector('.toast-container')||this.createToastContainer();
+        const t = document.createElement('div');
+        t.className=`toast ${type}`;
+        t.innerHTML=`<div class="toast-title">${title}</div><div class="toast-description">${desc}</div>`;
+        c.appendChild(t);
+        setTimeout(()=>t.remove(),3000);
+    },
+    createToastContainer(){
+        const c=document.createElement('div');
+        c.className='toast-container';
+        document.body.appendChild(c);
+        return c;
+    },
+    formatDate(d){ return new Date(d).toLocaleDateString(); },
+    formatCurrency(a,c='USD'){ return `${c} ${a.toLocaleString()}`; },
+    getStatusBadgeClass(s){
+        const m={'Successful':'badge-success','Under Process':'badge-warning','Unsuccessful':'badge-destructive','Pending':'badge-warning'};
+        return m[s]||'badge-secondary';
+    }
+};
+
+const Modal = {
+    show(title,content,desc=''){
+        const o=document.createElement('div');
+        o.className='modal-overlay';
+        o.innerHTML=`
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">${title}</div>
+                    ${desc?`<div class="modal-description">${desc}</div>`:''}
+                </div>
+                <div class="modal-content">${content}</div>
+            </div>`;
+        document.body.appendChild(o);
+        o.addEventListener('click',e=>{if(e.target===o) o.remove();});
+        return o;
+    },
+    close(o){ if(o) o.remove(); }
+};
+
+const Layout = {
+    render(pageTitle,content){
+        const u=Auth.getUser();
+        return `
+            <div class="app-container">
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-logo">AJ</div>
+                        <div class="sidebar-title"><h2>A J Travels</h2><p>Travel Portal</p></div>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <button class="nav-item" data-page="dashboard">Dashboard</button>
+                        <button class="nav-item" data-page="my-bookings">My Bookings</button>
+                        <button class="nav-item" data-page="inquiries">Inquiries</button>
+                        <button class="nav-item" data-page="reports">Reports</button>
+                    </nav>
+                    <div class="sidebar-footer">
+                        <div class="user-info"><p>${u.name}</p><small>${u.email}</small><div class="user-role">${u.role}</div></div>
+                        <button class="btn btn-outline w-full" onclick="handleLogout()">Logout</button>
+                    </div>
+                </aside>
+                <div class="main-content">
+                    <header class="header">
+                        <button class="btn btn-ghost btn-icon mobile-menu-btn" onclick="toggleSidebar()">Menu</button>
+                        <h1>${pageTitle}</h1>
+                    </header>
+                    <main class="content">${content}</main>
+                </div>
+            </div>`;
+    },
+    updateActiveNav(p){
+        document.querySelectorAll('.nav-item').forEach(i=>{i.classList.remove('active'); if(i.dataset.page===p) i.classList.add('active');});
+    }
+};
+function toggleSidebar(){
+    const s=document.getElementById('sidebar');
+    const open=s.classList.toggle('open');
+    if(open){
+        const o=document.createElement('div');
+        o.className='sidebar-overlay';
+        o.onclick=toggleSidebar;
+        document.body.appendChild(o);
+    }else{
+        const o=document.querySelector('.sidebar-overlay');
+        if(o) o.remove();
+    }
+}
+function handleLogout(){ Auth.logout(); Router.navigate('login'); }
+
+/* ---------- dashboard.js ---------- */
+const Dashboard = {
+    render(){
+        const u=Auth.getUser();
+        const inqs=Storage.getInquiries().filter(i=>u.role==='admin'||i.employeeId===u.id);
+        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
+        const succ=inqs.filter(i=>i.status==='Successful').length;
+        const proc=inqs.filter(i=>i.status==='Under Process').length;
+        const upcoming=bks.filter(b=>new Date(b.travelDate)>new Date()).length;
+
+        const content=`
+            <div class="space-y-6">
+                <div class="grid grid-cols-4">
+                    <div class="card metric-card"><div class="metric-card-header"><div class="metric-card-title">Total Bookings</div><div>Calendar</div></div><div class="metric-value" style="color:var(--primary)">${bks.length}</div><div class="metric-label">This month</div></div>
+                    <div class="card metric-card"><div class="metric-card-header"><div class="metric-card-title">Successful</div><div style="color:var(--success)">Check</div></div><div class="metric-value" style="color:var(--success)">${succ}</div><div class="metric-label">Inquiries closed</div></div>
+                    <div class="card metric-card"><div class="metric-card-header"><div class="metric-card-title">Under Process</div><div style="color:var(--warning)">Clock</div></div><div class="metric-value" style="color:var(--warning)">${proc}</div><div class="metric-label">Active inquiries</div></div>
+                    <div class="card metric-card"><div class="metric-card-header"><div class="metric-card-title">Upcoming Departures</div><div>Airplane</div></div><div class="metric-value">${upcoming}</div><div class="metric-label">Scheduled trips</div></div>
+                </div>
+
+                <div class="card"><div class="card-header"><div class="card-title">Quick Actions</div><div class="card-description">Frequently used actions</div></div>
+                    <div class="card-content"><div class="actions-flex">
+                        ${u.role==='admin'?`<button class="btn btn-primary" onclick="Dashboard.showAddEmployee()">Add Employee</button>`:''}
+                        <button class="btn btn-primary" onclick="Router.navigate('inquiries')">New Inquiry</button>
+                    </div></div>
+                </div>
+
+                <div class="card"><div class="card-header"><div class="card-title">Check PNR Status</div><div class="card-description">Search booking by PNR number</div></div>
+                    <div class="card-content"><div class="flex gap-2"><input type="text" id="pnrSearch" class="form-input" placeholder="Enter Airline or GDS PNR"><button class="btn btn-primary" onclick="Dashboard.searchPNR()">Search</button></div><div id="pnrResult"></div></div>
+                </div>
+
+                <div class="card"><div class="card-header"><div class="card-title">Recent Inquiries</div><div class="card-description">Latest inquiry submissions</div></div>
+                    <div class="card-content"><div class="table-container"><table class="table">
+                        <thead><tr><th>ID</th><th>Client Name</th><th>Destination</th><th>Travel Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${inqs.slice(0,5).map(i=>`
+                            <tr><td class="font-mono">${i.id}</td><td>${i.clientName}</td><td>${i.destination}</td><td>${Utils.formatDate(i.travelDate)}</td>
+                            <td><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${i.status}</span></td>
+                            <td><button class="btn btn-ghost btn-sm" onclick="Router.navigate('inquiries')">View</button></td></tr>`).join('')}
+                        </tbody></table></div></div>
+                </div>
+            </div>`;
+        return Layout.render('Dashboard',content);
+    },
+
+    searchPNR(){
+        const p=document.getElementById('pnrSearch').value.trim();
+        const r=document.getElementById('pnrResult');
+        if(!p){ Utils.showToast('Error','Please enter a PNR','error'); return; }
+        const u=Auth.getUser();
+        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
+        const f=bks.find(b=>b.airlinePNR.toLowerCase()===p.toLowerCase()||b.gdsPNR.toLowerCase()===p.toLowerCase());
+        if(f){
+            r.innerHTML=`<div class="info-box"><h4 style="font-weight:600;margin-bottom:12px">Booking Details</h4>
+                <div class="info-grid"><div>Client: ${f.clientName}</div><div>Invoice: ${f.invoiceNumber}</div>
+                <div>Destination: ${f.destination}</div><div>Travel Date: ${Utils.formatDate(f.travelDate)}</div>
+                <div>Payment: ${f.paymentStatus}</div><div>Amount: ${Utils.formatCurrency(f.amount,f.currency)}</div></div></div>`;
+        }else{
+            Utils.showToast('Not Found','No booking found with this PNR','error');
+            r.innerHTML='';
+        }
+    },
+
+    showAddEmployee(){
+        const html=`<form id="addEmployeeForm">
+            <div class="form-group"><label class="form-label">Name</label><input type="text" id="empName" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="empEmail" class="form-input" required></div>
+            <button type="submit" class="btn btn-primary w-full">Add Employee</button></form>`;
+        const m=Modal.show('Add New Employee',html,'Enter employee details');
+        document.getElementById('addEmployeeForm').onsubmit=e=>{
+            e.preventDefault();
+            const emp={id:Date.now().toString(),name:document.getElementById('empName').value,email:document.getElementById('empEmail').value,role:'employee'};
+            Storage.saveEmployee(emp);
+            Utils.showToast('Success','Employee added successfully');
+            Modal.close(m);
+        };
+    }
+};
+
+/* ---------- my-bookings.js ---------- */
+const MyBookings = {
+    render(){
+        const u=Auth.getUser();
+        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
+        const content=`
+            <div class="space-y-6"><div class="card"><div class="card-header"><div class="card-title">My Bookings</div><div class="card-description">View all your bookings and their details</div></div>
+                <div class="card-content">
+                    <div class="mb-4"><div class="search-box"><span class="search-icon">Search</span><input type="text" id="bookingSearch" class="form-input" placeholder="Search by client, invoice, PNR, or destination..." oninput="MyBookings.filterBookings()"></div></div>
+                    <div class="table-container"><table class="table"><thead><tr><th>Invoice #</th><th>Client</th><th>Destination</th><th>Travel Date</th><th>Airline PNR</th><th>GDS PNR</th><th>Amount</th><th>Payment</th><th>Mode</th></tr></thead>
+                        <tbody id="bookingsTableBody">${this.renderRows(bks)}</tbody></table></div>
+                    <div class="summary-box"><p>Total Bookings: <span id="totalBookings">${bks.length}</span></p>
+                        <p>Total Revenue: <span id="totalRevenue">${Utils.formatCurrency(bks.reduce((s,b)=>s+(b.currency==='USD'?b.amount:0),0))}</span></p></div>
+                </div></div></div>`;
+        const html = Layout.render('My Bookings', content);
+        setTimeout(() => Layout.updateActiveNav('my-bookings'), 0);
+        return html;
+    },
+    renderRows(bks){
+        if(!bks.length) return '<tr><td colspan="9" class="text-center" style="color:var(--muted-foreground)">No bookings found</td></tr>';
+        return bks.map(b=>`<tr><td class="font-mono">${b.invoiceNumber}</td><td>${b.clientName}</td><td>${b.destination}</td><td>${Utils.formatDate(b.travelDate)}</td>
+            <td class="font-mono">${b.airlinePNR}</td><td class="font-mono">${b.gdsPNR}</td><td>${Utils.formatCurrency(b.amount,b.currency)}</td>
+            <td><span class="badge ${Utils.getStatusBadgeClass(b.paymentStatus)}">${b.paymentStatus}</span></td><td>${b.paymentMode}</td></tr>`).join('');
+    },
+    filterBookings(){
+        const term=document.getElementById('bookingSearch').value.toLowerCase();
+        const u=Auth.getUser();
+        const all=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
+        const filtered=all.filter(b=>b.clientName.toLowerCase().includes(term)||b.invoiceNumber.toLowerCase().includes(term)||b.airlinePNR.toLowerCase().includes(term)||b.destination.toLowerCase().includes(term));
+        document.getElementById('bookingsTableBody').innerHTML=this.renderRows(filtered);
+        document.getElementById('totalBookings').textContent=filtered.length;
+        document.getElementById('totalRevenue').textContent=Utils.formatCurrency(filtered.reduce((s,b)=>s+(b.currency==='USD'?b.amount:0),0));
+    }
+};
+
+/* ---------- inquiries.js ---------- */
+const Inquiries = {
+    currentInquiries:[],
+    render(){
+        this.loadInquiries();
+        const content=`
+            <div class="space-y-6"><div class="card"><div class="card-header card-header-flex">
+                <div><div class="card-title">Inquiries Management</div><div class="card-description">Manage all client inquiries</div></div>
+                <button class="btn btn-primary" onclick="Inquiries.showAddDialog()">Add New</button>
+            </div><div class="card-content"><div class="table-container"><table class="table">
+                <thead><tr><th>ID</th><th>Client</th><th>Destination</th><th>Travel Date</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>${this.renderRows()}</tbody></table></div></div></div></div>`;
+        const html = Layout.render('Inquiries', content);
+        setTimeout(() => Layout.updateActiveNav('inquiries'), 0);
+        return html;
+    },
+    loadInquiries(){
+        const u=Auth.getUser();
+        const all=Storage.getInquiries();
+        this.currentInquiries = u.role==='admin'?all:all.filter(i=>i.employeeId===u.id);
+    },
+    renderRows(){
+        if(!this.currentInquiries.length) return '<tr><td colspan="7" class="text-center" style="color:var(--muted-foreground)">No inquiries found</td></tr>';
+        return this.currentInquiries.map(i=>`<tr>
+            <td class="font-mono">${i.id}</td>
+            <td>${i.clientName}</td>
+            <td>${i.destination}</td>
+            <td>${Utils.formatDate(i.travelDate)}</td>
+            <td>${i.inquiryFor}</td>
+            <td><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${i.status}</span></td>
+            <td class="flex gap-1">
+                <button class="btn btn-ghost btn-sm" onclick="Inquiries.edit('${i.id}')" title="Edit">Edit</button>
+                <button class="btn btn-ghost btn-sm" onclick="Inquiries.updateStatus('${i.id}','process')" title="Mark as Under Process">Clock</button>
+                <button class="btn btn-ghost btn-sm" onclick="Inquiries.updateStatus('${i.id}','success')" title="Mark as Successful">Check</button>
+                <button class="btn btn-ghost btn-sm" onclick="Inquiries.updateStatus('${i.id}','unsuccessful')" title="Mark as Unsuccessful">Cross</button>
+                <button class="btn btn-ghost btn-sm text-red-600" onclick="Inquiries.delete('${i.id}')" title="Delete">Delete</button>
+            </td>
+        </tr>`).join('');
+    },
+    showAddDialog(){
+        const html=`<form id="addInquiryForm" class="space-y-4">
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Client Name *</label><input type="text" id="clientName" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Contact Number *</label><input type="text" id="contactNumber" class="form-input" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="email" class="form-input"></div>
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Inquiry For *</label>
+                    <select id="inquiryFor" class="form-select" required>
+                        <option value="Tickets">Tickets</option><option value="Tour Package">Tour Package</option>
+                        <option value="Hotel">Hotel</option><option value="Others">Others</option>
+                    </select></div>
+                <div class="form-group"><label class="form-label">Destination *</label><input type="text" id="destination" class="form-input" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Travel Date *</label><input type="date" id="travelDate" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">Description</label><textarea id="description" class="form-textarea" rows="4"></textarea></div>
+            <button type="submit" class="btn btn-primary w-full">Create Inquiry</button></form>`;
+        const m=Modal.show('Add New Inquiry',html,'Enter client inquiry details');
+        document.getElementById('addInquiryForm').onsubmit=e=>{
+            e.preventDefault();
+            const u=Auth.getUser();
+            const inq={
+                id:'INQ'+Date.now(),clientName:document.getElementById('clientName').value,contactNumber:document.getElementById('contactNumber').value,
+                email:document.getElementById('email').value,inquiryFor:document.getElementById('inquiryFor').value,destination:document.getElementById('destination').value,
+                travelDate:document.getElementById('travelDate').value,description:document.getElementById('description').value,
+                status:'Under Process',inquiryDate:new Date().toISOString(),employeeId:u.id,employeeName:u.name
+            };
+            Storage.saveInquiry(inq);
+            Utils.showToast('Success','Inquiry created successfully');
+            Modal.close(m);
+            Router.navigate('inquiries');
+        };
+    },
+    edit(id){
+        const inq = this.currentInquiries.find(i => i.id === id);
+        if (!inq) return;
+        const html=`<form id="editInquiryForm" class="space-y-4">
+            <input type="hidden" id="editId" value="${inq.id}">
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Client Name *</label><input type="text" id="clientName" class="form-input" value="${inq.clientName}" required></div>
+                <div class="form-group"><label class="form-label">Contact Number *</label><input type="text" id="contactNumber" class="form-input" value="${inq.contactNumber}" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="email" class="form-input" value="${inq.email}"></div>
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Inquiry For *</label>
+                    <select id="inquiryFor" class="form-select" required>${['Tickets','Tour Package','Hotel','Others'].map(o=>`<option value="${o}" ${inq.inquiryFor===o?'selected':''}>${o}</option>`).join('')}</select></div>
+                <div class="form-group"><label class="form-label">Destination *</label><input type="text" id="destination" class="form-input" value="${inq.destination}" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Travel Date *</label><input type="date" id="travelDate" class="form-input" value="${inq.travelDate}" required></div>
+            <div class="form-group"><label class="form-label">Description</label><textarea id="description" class="form-textarea" rows="4">${inq.description}</textarea></div>
+            <button type="submit" class="btn btn-primary w-full">Update Inquiry</button></form>`;
+        const m=Modal.show('Edit Inquiry',html);
+        document.getElementById('editInquiryForm').onsubmit=e=>{
+            e.preventDefault();
+            const updated = {
+                ...inq,
+                clientName: document.getElementById('clientName').value,
+                contactNumber: document.getElementById('contactNumber').value,
+                email: document.getElementById('email').value,
+                inquiryFor: document.getElementById('inquiryFor').value,
+                destination: document.getElementById('destination').value,
+                travelDate: document.getElementById('travelDate').value,
+                description: document.getElementById('description').value
+            };
+            Storage.saveInquiry(updated);
+            Utils.showToast('Success','Inquiry updated successfully');
+            Modal.close(m);
+            Router.navigate('inquiries');
+        };
+    },
+    delete(id){
+        if(confirm('Are you sure you want to delete this inquiry? This action cannot be undone.')){
+            Storage.deleteInquiry(id);
+            Utils.showToast('Deleted','Inquiry removed permanently');
+            Router.navigate('inquiries');
+        }
+    },
+    updateStatus(id,act){
+        const inq=this.currentInquiries.find(i=>i.id===id);
+        if(!inq) return;
+        if(act==='process'){
+            inq.status='Under Process';
+            Storage.saveInquiry(inq);
+            Utils.showToast('Updated','Inquiry marked as Under Process');
+            Router.navigate('inquiries');
+        }else if(act==='success'){
+            this.showSuccessDialog(inq);
+        }else if(act==='unsuccessful'){
+            this.showUnsuccessfulDialog(inq);
+        }
+    },
+    showSuccessDialog(inq){
+        const today=new Date().toISOString().split('T')[0];
+        const html=`<form id="successForm" class="space-y-4">
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Closing Date</label><input type="date" id="closingDate" class="form-input" value="${today}" required></div>
+                <div class="form-group"><label class="form-label">Invoice Number</label><input type="text" id="invoiceNumber" class="form-input" required></div>
+            </div>
+            <div class="grid grid-cols-2">
+                <div class="form-group"><label class="form-label">Airline PNR</label><input type="text" id="airlinePNR" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">GDS PNR</label><input type="text" id="gdsPNR" class="form-input" required></div>
+            </div>
+            <div class="form-group"><label class="form-label">Booking Details</label><textarea id="bookingDetails" class="form-textarea" rows="3"></textarea></div>
+            <div class="grid grid-cols-3">
+                <div class="form-group"><label class="form-label">Amount</label><input type="number" id="amount" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Currency</label>
+                    <select id="currency" class="form-select"><option value="USD">USD</option><option value="EUR">EUR</option><option value="INR">INR</option><option value="GBP">GBP</option></select></div>
+                <div class="form-group"><label class="form-label">Payment Mode</label>
+                    <select id="paymentMode" class="form-select"><option value="Cash">Cash</option><option value="Card">Card</option><option value="Online">Online</option></select></div>
+            </div>
+            <div class="form-group"><label class="form-label">Payment Status</label>
+                <select id="paymentStatus" class="form-select"><option value="Pending">Pending</option><option value="Successful">Successful</option></select></div>
+            <button type="submit" class="btn btn-primary w-full">Create Booking</button></form>`;
+        const m=Modal.show('Mark as Successful',html);
+        document.getElementById('successForm').onsubmit=e=>{
+            e.preventDefault();
+            const u=Auth.getUser();
+            const bk={
+                id:'BK'+Date.now(),inquiryId:inq.id,clientName:inq.clientName,contactNumber:inq.contactNumber,email:inq.email,
+                inquiryDate:inq.inquiryDate,closingDate:document.getElementById('closingDate').value,invoiceNumber:document.getElementById('invoiceNumber').value,
+                airlinePNR:document.getElementById('airlinePNR').value,gdsPNR:document.getElementById('gdsPNR').value,bookingDetails:document.getElementById('bookingDetails').value,
+                paymentStatus:document.getElementById('paymentStatus').value,amount:parseFloat(document.getElementById('amount').value),
+                currency:document.getElementById('currency').value,paymentMode:document.getElementById('paymentMode').value,
+                employeeId:u.id,employeeName:u.name,destination:inq.destination,travelDate:inq.travelDate
+            };
+            Storage.saveBooking(bk);
+            inq.status='Successful';
+            inq.closingDate=bk.closingDate;
+            Storage.saveInquiry(inq);
+            Utils.showToast('Success','Booking created successfully');
+            Modal.close(m);
+            Router.navigate('inquiries');
+        };
+    },
+    showUnsuccessfulDialog(inq){
+        const html=`<form id="unsuccessfulForm">
+            <div class="form-group"><label class="form-label">Reason for Unsuccessful</label>
+                <textarea id="unsuccessfulReason" class="form-textarea" rows="4" placeholder="Enter reason..." required></textarea></div>
+            <button type="submit" class="btn btn-primary w-full">Mark as Unsuccessful</button></form>`;
+        const m=Modal.show('Mark as Unsuccessful',html);
+        document.getElementById('unsuccessfulForm').onsubmit=e=>{
+            e.preventDefault();
+            inq.status='Unsuccessful';
+            inq.unsuccessfulReason=document.getElementById('unsuccessfulReason').value;
+            Storage.saveInquiry(inq);
+            Utils.showToast('Success','Inquiry marked as unsuccessful');
+            Modal.close(m);
+            Router.navigate('inquiries');
+        };
+    }
+};
+
+/* ---------- reports.js ---------- */
+const Reports = {
+    currentPeriod:'monthly', currentEmployee:'all', charts:{},
+    render(){
+        const u=Auth.getUser();
+        const emps=Storage.getEmployees();
+        const content=`
+            <div class="space-y-6"><div class="card"><div class="card-header"><div class="card-title">Performance Reports</div><div class="card-description">Visualize employee performance metrics</div></div>
+                <div class="card-content">
+                    <div class="flex gap-4 mb-4">
+                        <div style="flex:1"><select id="periodSelect" class="form-select" onchange="Reports.changePeriod(this.value)">
+                            <option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option>
+                        </select></div>
+                        ${u.role==='admin'?`<div style="flex:1"><select id="employeeSelect" class="form-select" onchange="Reports.changeEmployee(this.value)">
+                            <option value="all">All Employees</option>${emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}</select></div>`:''}
+                    </div>
+                    <div class="space-y-6">
+                        <div><h3 style="font-size:18px;font-weight:600;margin-bottom:16px">Inquiry Status Distribution</h3>
+                            <div class="chart-container"><canvas id="statusChart"></canvas></div></div>
+                        <div><h3 style="font-size:18px;font-weight:600;margin-bottom:16px">Revenue Trend</h3>
+                            <div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
+                    </div>
+                </div></div>
+                <div class="grid grid-cols-3">
+                    <div class="card"><div class="card-header"><div class="card-title" style="font-size:14px">Total Inquiries</div></div>
+                        <div class="card-content"><div class="text-3xl font-bold" style="color:var(--primary);font-size:32px;font-weight:bold" id="totalInquiries">0</div></div></div>
+                    <div class="card"><div class="card-header"><div class="card-title" style="font-size:14px">Success Rate</div></div>
+                        <div class="card-content"><div class="text-3xl font-bold" style="color:var(--success);font-size:32px;font-weight:bold" id="successRate">0%</div></div></div>
+                    <div class="card"><div class="card-header"><div class="card-title" style="font-size:14px">Total Revenue</div></div>
+                        <div class="card-content"><div class="text-3xl font-bold" style="color:var(--accent);font-size:32px;font-weight:bold" id="totalRevenue">$0</div></div></div>
+                </div></div>`;
+        const html = Layout.render('Reports', content);
+        setTimeout(() => {
+            Layout.updateActiveNav('reports');
+            this.updateCharts();
+        }, 100);
+        return html;
+    },
+    changePeriod(p){ this.currentPeriod=p; this.updateCharts(); },
+    changeEmployee(e){ this.currentEmployee=e; this.updateCharts(); },
+    getFilteredInquiries(){
+        const u=Auth.getUser();
+        let list=Storage.getInquiries();
+        if(u.role==='employee') list=list.filter(i=>i.employeeId===u.id);
+        else if(this.currentEmployee!=='all') list=list.filter(i=>i.employeeId===this.currentEmployee);
+        return list;
+    },
+    getChartData(){
+        const list=this.getFilteredInquiries();
+        const map=new Map();
+        list.forEach(i=>{
+            const d=new Date(i.inquiryDate);
+            let key='';
+            if(this.currentPeriod==='weekly'){ const w=Math.floor(d.getDate()/7)+1; key=`Week ${w}`; }
+            else if(this.currentPeriod==='monthly') key=d.toLocaleString('default',{month:'short',year:'numeric'});
+            else key=d.getFullYear().toString();
+            if(!map.has(key)) map.set(key,{successful:0,underProcess:0,unsuccessful:0});
+            const s=map.get(key);
+            if(i.status==='Successful') s.successful++;
+            else if(i.status==='Under Process') s.underProcess++;
+            else if(i.status==='Unsuccessful') s.unsuccessful++;
+        });
+        return Array.from(map.entries()).slice(-12);
+    },
+    getRevenueData(){
+        const u=Auth.getUser();
+        let list=Storage.getBookings();
+        if(u.role==='employee') list=list.filter(b=>b.employeeId===u.id);
+        else if(this.currentEmployee!=='all') list=list.filter(b=>b.employeeId===this.currentEmployee);
+        const map=new Map();
+        list.forEach(b=>{
+            const d=new Date(b.closingDate);
+            let key='';
+            if(this.currentPeriod==='weekly'){ const w=Math.floor(d.getDate()/7)+1; key=`Week ${w}`; }
+            else if(this.currentPeriod==='monthly') key=d.toLocaleString('default',{month:'short',year:'numeric'});
+            else key=d.getFullYear().toString();
+            if(!map.has(key)) map.set(key,0);
+            map.set(key,map.get(key)+b.amount);
+        });
+        return Array.from(map.entries()).slice(-12);
+    },
+    updateCharts(){
+        const statusData=this.getChartData();
+        const revData=this.getRevenueData();
+        const inqs=this.getFilteredInquiries();
+        const totalInqs=inqs.length;
+        const succ=inqs.filter(i=>i.status==='Successful').length;
+        const rate=totalInqs?Math.round((succ/totalInqs)*100):0;
+        const totalRev=revData.reduce((s,[,r])=>s+r,0);
+        document.getElementById('totalInquiries').textContent=totalInqs;
+        document.getElementById('successRate').textContent=rate+'%';
+        document.getElementById('totalRevenue').textContent='$'+Math.round(totalRev).toLocaleString();
+
+        if(this.charts.status) this.charts.status.destroy();
+        const sCtx=document.getElementById('statusChart');
+        if(sCtx){
+            this.charts.status=new Chart(sCtx,{type:'bar',data:{labels:statusData.map(([l])=>l),datasets:[
+                {label:'Successful',data:statusData.map(([,d])=>d.successful),backgroundColor:'hsl(142,76%,36%)'},
+                {label:'Under Process',data:statusData.map(([,d])=>d.underProcess),backgroundColor:'hsl(38,92%,50%)'},
+                {label:'Unsuccessful',data:statusData.map(([,d])=>d.unsuccessful),backgroundColor:'hsl(0,74%,51%)'}
+            ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
+        }
+
+        if(this.charts.revenue) this.charts.revenue.destroy();
+        const rCtx=document.getElementById('revenueChart');
+        if(rCtx){
+            this.charts.revenue=new Chart(rCtx,{type:'line',data:{labels:revData.map(([l])=>l),datasets:[{
+                label:'Revenue (USD)',data:revData.map(([,r])=>Math.round(r)),borderColor:'hsl(200,95%,42%)',
+                backgroundColor:'hsla(200,95%,42%,.1)',tension:0.4,fill:true
+            }]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});
+        }
+    }
+};
+
+/* ---------- main.js ---------- */
+const Router = {
+    currentPage:null,
+    init(){
+        if(!Auth.isAuthenticated()){ this.renderLogin(); return; }
+        const hash=window.location.hash.slice(1)||'dashboard';
+        this.navigate(hash);
+        window.addEventListener('hashchange',()=>{ const p=window.location.hash.slice(1)||'dashboard'; this.navigate(p); });
+        document.addEventListener('click',e=>{
+            const nav=e.target.closest('.nav-item');
+            if(nav && nav.dataset.page){ e.preventDefault(); this.navigate(nav.dataset.page); }
+        });
+    },
+    navigate(page){
+        if(!Auth.isAuthenticated() && page!=='login'){ this.renderLogin(); return; }
+        this.currentPage=page;
+        window.location.hash=page;
+        const app=document.getElementById('app');
+        switch(page){
+            case 'login': this.renderLogin(); break;
+            case 'dashboard': app.innerHTML=Dashboard.render(); Layout.updateActiveNav('dashboard'); break;
+            case 'my-bookings': app.innerHTML=MyBookings.render(); break;
+            case 'inquiries': app.innerHTML=Inquiries.render(); break;
+            case 'reports': app.innerHTML=Reports.render(); break;
+            default: this.navigate('dashboard');
+        }
+    },
+    renderLogin(){
+        const app=document.getElementById('app');
+        app.innerHTML=`
+            <div class="login-container"><div class="card login-card"><div class="card-content">
+                <div class="login-header"><div class="login-logo">AJ</div>
+                    <h1 style="font-size:24px;font-weight:bold;margin-bottom:4px">A J Travels</h1>
+                    <p style="color:var(--muted-foreground)">Sign in to your account</p></div>
+                <form id="loginForm">
+                    <div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="form-input" placeholder="Enter your email" required></div>
+                    <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required></div>
+                    <button type="submit" class="btn btn-primary w-full">Sign In</button>
+                </form>
+                <div class="demo-credentials"><p>Demo Credentials:</p><p>Admin: admin@ajtravels.com</p><p>Employee: employee@ajtravels.com</p><p>Password: password</p></div>
+            </div></div></div>`;
+        document.getElementById('loginForm').onsubmit=e=>{
+            e.preventDefault();
+            const res=Auth.login(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value);
+            if(res.success){ Utils.showToast('Success','Logged in successfully'); this.navigate('dashboard'); }
+            else Utils.showToast('Error',res.error,'error');
+        };
+    }
+};
+
+document.addEventListener('DOMContentLoaded',()=>Router.init());
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
 
                <head>
                               <meta charset="UTF-8">
@@ -1336,3 +2100,4 @@
                </body>
 
 </html>
+
