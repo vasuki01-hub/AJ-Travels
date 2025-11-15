@@ -155,8 +155,8 @@
             .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%)}
             .sidebar.open{transform:translateX(0)}
             .mobile-menu-btn{display:block}
-            .sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:99;opacity:0;transition:opacity .3s}
-            .sidebar.open ~ .sidebar-overlay{opacity:1}
+            .sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:99;opacity:0;visibility:hidden;transition:opacity .3s}
+            .sidebar-overlay.open{opacity:1;visibility:visible}
         }
         .actions-flex{display:flex;flex-wrap:wrap;gap:12px}
         .search-box{position:relative}
@@ -176,6 +176,78 @@
         .theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--card);border-radius:50%;transition:transform .3s cubic-bezier(0.4, 0, 1, 1),background .3s;box-shadow:0 2px 4px rgba(0,0,0,.2)}
         [data-theme="dark"] .theme-toggle::after{transform:translateX(16px)}
         .theme-toggle:active::after{transform:scale(0.9)}
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 16px;
+            }
+            .content {
+                padding: 16px;
+            }
+            .card-header,
+            .card-content {
+                padding: 16px;
+            }
+            .grid-cols-2,
+            .grid-cols-3,
+            .grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+            .metric-card {
+                padding: 16px;
+            }
+            .table th,
+            .table td {
+                padding: 8px 4px;
+                font-size: 13px;
+            }
+            .nav-item {
+                padding: 12px 12px;
+                font-size: 14px;
+            }
+            .sidebar-header {
+                padding: 16px;
+            }
+            .form-input,
+            .form-select,
+            .form-textarea {
+                font-size: 16px;
+            }
+            td.flex {
+                flex-direction: column !important;
+                gap: 4px;
+            }
+            td.flex .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .actions-flex {
+                flex-direction: column;
+            }
+            .actions-flex .btn {
+                width: 100%;
+            }
+            .modal {
+                max-width: 95vw;
+                margin: 0 auto;
+            }
+            .login-container {
+                padding: 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            .toast {
+                min-width: auto;
+                width: calc(100% - 32px);
+                right: 16px;
+                left: 16px;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            .card-title {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -362,7 +434,7 @@ function toggleSidebar(){
     const open=s.classList.toggle('open');
     if(open){
         const o=document.createElement('div');
-        o.className='sidebar-overlay';
+        o.className='sidebar-overlay open';
         o.onclick=toggleSidebar;
         document.body.appendChild(o);
     }else{
@@ -784,6 +856,16 @@ const Reports = {
 /* ---------- Router ---------- */
 const Router = {
     navigate(page){
+        // Close sidebar and remove overlay before navigation to prevent blur issues
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            toggleSidebar();
+        }
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+
         if(!Auth.isAuthenticated() && page!=='login'){ this.renderLogin(); return; }
         const app=document.getElementById('app');
         let html = '';
@@ -803,6 +885,11 @@ const Router = {
         if(page==='my-bookings') setTimeout(MyBookings.filter, 100);
     },
     renderLogin(){
+        // Ensure no overlay on login
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
         const app=document.getElementById('app');
         app.innerHTML=`
             <div class="login-container">
