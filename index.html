@@ -24,7 +24,7 @@
 
         :root {
             --background: hsl(210, 20%, 98%);
-            --foreground: hsl(215, 25%, 15%);
+            --foreground: hsl(217, 13%, 34%);
             --card: hsl(0, 0%, 100%);
             --card-foreground: hsl(215, 25%, 15%);
             --primary: hsl(200, 95%, 42%);
@@ -1528,7 +1528,7 @@
                     if (res.status === 404) {
                         this.dbAvailable = false;
                         // Terminate the SDK Firestore instance to prevent retry loops
-                        try { await F.terminate(F.db); } catch (_) {}
+                        try { await F.terminate(F.db); } catch (_) { }
                         F.db = null;
                         console.info('AJ Travels: Firestore not provisioned — running in local-only mode.');
                     } else {
@@ -1677,9 +1677,10 @@
                     'auth/invalid-credential': 'Incorrect email or password.',
                     'auth/invalid-email': 'Please enter a valid email address.',
                     'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
-                    'auth/user-disabled': 'This account has been disabled.'
+                    'auth/user-disabled': 'This account has been disabled.',
+                    'auth/unauthorized-domain': 'This domain (Vercel) is not authorized in Firebase. Please add it in Firebase Console -> Authentication -> Settings -> Authorized Domains.'
                 };
-                return map[code] || 'Login failed. Please try again.';
+                return map[code] || 'Login failed (' + code + '). Please try again.';
             },
             async signupFirebase({ fullName, contact, email, password, otp, expectedOtp }) {
                 if (String(otp).trim() !== String(expectedOtp)) return { success: false, error: 'Invalid OTP' };
