@@ -1,239 +1,1049 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A J Travels - Inquiry Portal</title>
     <meta name="description" content="Professional travel inquiry and booking management portal for A J Travels">
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <link rel="apple-touch-icon" href="favicon.jpg">
+    <meta name="theme-color" content="#1a237e">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{
-            --background:hsl(210,20%,98%);--foreground:hsl(215,25%,15%);
-            --card:hsl(0,0%,100%);--card-foreground:hsl(215,25%,15%);
-            --primary:hsl(200,95%,42%);--primary-foreground:hsl(0,0%,100%);
-            --secondary:hsl(210,30%,92%);--secondary-foreground:hsl(215,25%,15%);
-            --muted:hsl(210,30%,94%);--muted-foreground:hsl(215,16%,45%);
-            --accent:hsl(185,85%,50%);--accent-foreground:hsl(0,0%,100%);
-            --destructive:hsl(0,72%,51%);--destructive-foreground:hsl(0,0%,100%);
-            --success:hsl(142,76%,36%);--success-foreground:hsl(0,0%,100%);
-            --warning:hsl(38,92%,50%);--warning-foreground:hsl(0,0%,100%);
-            --border:hsl(210,30%,88%);--input:hsl(210,30%,90%);--ring:hsl(200,95%,42%)
+        * {
+            overflow: auto;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
         }
-        [data-theme="dark"]{
-            --background:hsl(215,28%,17%);--foreground:hsl(210,20%,95%);
-            --card:hsl(215,28%,20%);--card-foreground:hsl(210,20%,95%);
-            --primary:hsl(200,95%,50%);--primary-foreground:hsl(0,0%,100%);
-            --secondary:hsl(215,25%,25%);--secondary-foreground:hsl(210,20%,85%);
-            --muted:hsl(215,25%,23%);--muted-foreground:hsl(215,16%,65%);
-            --accent:hsl(185,85%,60%);--accent-foreground:hsl(0,0%,100%);
-            --destructive:hsl(0,72%,60%);--destructive-foreground:hsl(0,0%,100%);
-            --success:hsl(142,76%,45%);--success-foreground:hsl(0,0%,100%);
-            --warning:hsl(38,92%,60%);--warning-foreground:hsl(0,0%,100%);
-            --border:hsl(215,25%,30%);--input:hsl(215,25%,28%);--ring:hsl(200,95%,50%)
+
+        :root {
+            --background: hsl(210, 20%, 98%);
+            --foreground: hsl(215, 25%, 15%);
+            --card: hsl(0, 0%, 100%);
+            --card-foreground: hsl(215, 25%, 15%);
+            --primary: hsl(200, 95%, 42%);
+            --primary-foreground: hsl(0, 0%, 100%);
+            --secondary: hsl(210, 30%, 92%);
+            --secondary-foreground: hsl(215, 25%, 15%);
+            --muted: hsl(210, 30%, 94%);
+            --muted-foreground: hsl(215, 16%, 45%);
+            --accent: hsl(185, 85%, 50%);
+            --accent-foreground: hsl(0, 0%, 100%);
+            --destructive: hsl(0, 72%, 51%);
+            --destructive-foreground: hsl(0, 0%, 100%);
+            --success: hsl(142, 76%, 36%);
+            --success-foreground: hsl(0, 0%, 100%);
+            --warning: hsl(38, 92%, 50%);
+            --warning-foreground: hsl(0, 0%, 100%);
+            --border: hsl(210, 30%, 88%);
+            --input: hsl(210, 30%, 90%);
+            --ring: hsl(200, 95%, 42%)
         }
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:var(--background);color:var(--foreground);line-height:1.6;transition:background .3s,color .3s}
-        .hidden{display:none!important}
-        .app-container{display:flex;height:100vh}
-        .sidebar{width:256px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1)}
-        .sidebar-header{display:flex;align-items:center;gap:8px;padding:24px;border-bottom:1px solid var(--border)}
-        .sidebar-logo{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:var(--primary-foreground);font-weight:bold;font-size:14px;overflow:hidden}
-        .sidebar-title h2{font-size:18px;font-weight:bold}
-        .sidebar-title p{font-size:12px;color:var(--muted-foreground)}
-        .sidebar-nav{flex:1;padding:16px}
-        .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;color:var(--foreground);font-weight:500;transition:all .25s cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:4px;position:relative;overflow:hidden}
-        .nav-item::before{content:'';position:absolute;inset:0;background:var(--primary);opacity:0;transition:opacity .25s;transform:scaleX(0);transform-origin:left}
-        .nav-item:hover{background:var(--secondary);transform:translateY(-1px)}
-        .nav-item:hover::before{opacity:0.1;transform:scaleX(1)}
-        .nav-item.active{background:var(--primary);color:var(--primary-foreground);box-shadow:0 4px 12px hsla(200,95%,42%,.2)}
-        .nav-item.active::before{opacity:0.2;transform:scaleX(1)}
-        .sidebar-footer{padding:16px;border-top:1px solid var(--border)}
-        .user-info{padding:12px;border-radius:8px;background:var(--secondary);margin-bottom:12px;transition:transform .2s}
-        .user-info:hover{transform:translateY(-2px)}
-        .user-info p{font-size:14px;font-weight:500}
-        .user-info small{font-size:12px;color:var(--muted-foreground)}
-        .user-role{font-size:12px;color:var(--accent);text-transform:capitalize;margin-top:4px}
-        .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-        .header{height:64px;border-bottom:1px solid var(--border);background:var(--card);padding:0 24px;display:flex;align-items:center;gap:16px}
-        .header h1{font-size:20px;font-weight:bold}
-        .content{flex:1;overflow-y:auto;padding:24px}
-        .btn{padding:8px 16px;border-radius:8px;border:none;font-weight:500;cursor:pointer;transition:all .25s cubic-bezier(0.4, 0, 0.2, 1);display:inline-flex;align-items:center;gap:8px;font-size:14px;position:relative;overflow:hidden}
-        .btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.2);border-radius:inherit;transform:scale(0);transition:transform .4s cubic-bezier(0.4, 0, 0.2, 1)}
-        .btn:active::before{transform:scale(2);opacity:0}
-        .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-        .btn-primary{background:var(--primary);color:var(--primary-foreground)}
-        .btn-primary:hover{opacity:.9;transform:scale(1.02)}
-        .btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
-        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--foreground)}
-        .btn-ghost{background:transparent;color:var(--foreground)}
-        .btn-ghost:hover{background:var(--secondary);transform:scale(1.05)}
-        .btn-icon{padding:8px;width:36px;height:36px}
-        .btn-sm{padding:4px 8px;font-size:12px}
-        .w-full{width:100%}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);opacity:0;transform:translateY(20px)}
-        .card.animate{opacity:1;transform:translateY(0)}
-        .card:hover{transform:translateY(-4px);box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04)}
-        .card-header{padding:16px 24px;border-bottom:1px solid var(--border)}
-        .card-header-flex{display:flex;justify-content:space-between;align-items:center}
-        .card-title{font-size:18px;font-weight:600}
-        .card-description{font-size:14px;color:var(--muted-foreground);margin-top:4px}
-        .card-content{padding:24px}
-        .form-group{margin-bottom:16px;position:relative}
-        .form-label{display:block;font-size:14px;font-weight:500;margin-bottom:6px;transition:all .2s;transform-origin:left}
-        .form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--background);font-size:14px;color:var(--foreground);transition:all .25s cubic-bezier(0.4, 0, 0.2, 1)}
-        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px hsla(200,95%,42%,.2);transform:scale(1.02)}
-        .form-textarea{min-height:100px;resize:vertical}
-        .grid{display:grid;gap:16px}
-        .grid-cols-2{grid-template-columns:repeat(2,1fr)}
-        .grid-cols-3{grid-template-columns:repeat(3,1fr)}
-        .grid-cols-4{grid-template-columns:repeat(4,1fr)}
-        .table-container{overflow-x:auto}
-        .table{width:100%;border-collapse:collapse;font-size:14px}
-        .table th{text-align:left;padding:12px;background:var(--muted);font-weight:600;color:var(--muted-foreground);border-bottom:1px solid var(--border)}
-        .table td{padding:12px;border-bottom:1px solid var(--border);transition:background .2s}
-        .table tr{opacity:0;transform:translateY(10px);transition:all .3s}
-        .table tr.animate{opacity:1;transform:translateY(0)}
-        .table tr:hover{background:hsla(210,30%,94%,.5);transform:translateY(-1px)}
-        [data-theme="dark"] .table tr:hover{background:hsla(215,25%,30%,.5)}
-        .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;transition:transform .2s}
-        .badge:hover{transform:scale(1.1)}
-        .badge-success{background:hsla(142,76%,36%,.1);color:var(--success)}
-        .badge-warning{background:hsla(38,92%,50%,.1);color:var(--warning)}
-        .badge-destructive{background:hsla(0,72%,51%,.1);color:var(--destructive)}
-        .badge-secondary{background:var(--secondary);color:var(--secondary-foreground)}
-        .metric-card{padding:20px;text-align:center;animation:pulse 2s infinite}
-        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-        .metric-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;color:var(--muted-foreground)}
-        .metric-card-title{font-weight:500}
-        .metric-value{font-size:32px;font-weight:bold;margin-bottom:4px;transition:transform .3s}
-        .metric-card:hover .metric-value{transform:scale(1.1)}
-        .metric-label{font-size:12px;color:var(--muted-foreground)}
-        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;opacity:0;animation:fadeIn .3s forwards}
-        @keyframes fadeIn{to{opacity:1}}
-        .modal{background:var(--card);border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);transform:scale(0.9);animation:modalPop .3s cubic-bezier(0.4, 0, 0.2, 1) forwards}
-        @keyframes modalPop{to{transform:scale(1)}}
-        .modal-header{padding:24px 24px 16px;border-bottom:1px solid var(--border)}
-        .modal-title{font-size:20px;font-weight:600}
-        .modal-description{font-size:14px;color:var(--muted-foreground);margin-top:4px}
-        .modal-content{padding:24px}
-        .flex{display:flex}
-        .flex-col{flex-direction:column}
-        .items-center{align-items:center}
-        .justify-between{justify-content:space-between}
-        .gap-1{gap:4px}
-        .gap-2{gap:8px}
-        .gap-3{gap:12px}
-        .gap-4{gap:16px}
-        .space-y-4 > * + *{margin-top:16px}
-        .space-y-6 > * + *{margin-top:24px}
-        .mt-4{margin-top:16px}
-        .mb-4{margin-bottom:16px}
-        .text-center{text-align:center}
-        .font-mono{font-family:monospace}
-        .login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,hsla(200,95%,42%,.1),var(--background),hsla(185,85%,50%,.1));padding:16px;transition:background .3s}
-        .login-card{max-width:400px;width:100%;opacity:0;transform:translateY(20px)}
-        .login-card.animate{opacity:1;transform:translateY(0);transition:opacity .6s ease-out,transform .6s ease-out}
-        .login-logo{width:64px;height:64px;margin:0 auto 16px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:var(--primary-foreground);font-size:32px;font-weight:bold;transition:transform .3s}
-        .login-logo:hover{transform:rotate(360deg)}
-        .login-header{text-align:center;margin-bottom:24px}
-        .demo-credentials{margin-top:24px;padding:16px;background:var(--muted);border-radius:8px;transition:transform .2s}
-        .demo-credentials:hover{transform:translateY(-2px)}
-        .demo-credentials p{font-size:12px;color:var(--muted-foreground);margin:4px 0}
-        .demo-credentials p:first-child{font-weight:500;margin-bottom:8px}
-        .toast-container{position:fixed;top:16px;right:16px;z-index:2000}
-        .toast{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);min-width:300px;animation:slideIn .3s ease, fadeOut 0.3s 2.7s forwards}
-        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-        @keyframes fadeOut{to{opacity:0;transform:translateX(100%)}}
-        .toast-title{font-weight:600;margin-bottom:4px}
-        .toast-description{font-size:14px;color:var(--muted-foreground)}
-        .toast.error{border-color:var(--destructive)}
-        .toast.error .toast-title{color:var(--destructive)}
-        .chart-container{position:relative;height:300px;margin-top:16px;opacity:0;transform:translateY(20px);transition:all .6s}
-        .chart-container.animate{opacity:1;transform:translateY(0)}
-        .mobile-menu-btn{display:none}
-        @media(max-width:1024px){
-            .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%)}
-            .sidebar.open{transform:translateX(0)}
-            .mobile-menu-btn{display:block}
-            .sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:99;opacity:0;visibility:hidden;transition:opacity .3s}
-            .sidebar-overlay.open{opacity:1;visibility:visible}
+
+        [data-theme="dark"] {
+            --background: hsl(215, 28%, 17%);
+            --foreground: hsl(210, 20%, 95%);
+            --card: hsl(215, 28%, 20%);
+            --card-foreground: hsl(210, 20%, 95%);
+            --primary: hsl(200, 95%, 50%);
+            --primary-foreground: hsl(0, 0%, 100%);
+            --secondary: hsl(215, 25%, 25%);
+            --secondary-foreground: hsl(210, 20%, 85%);
+            --muted: hsl(215, 25%, 23%);
+            --muted-foreground: hsl(215, 16%, 65%);
+            --accent: hsl(185, 85%, 60%);
+            --accent-foreground: hsl(0, 0%, 100%);
+            --destructive: hsl(0, 72%, 60%);
+            --destructive-foreground: hsl(0, 0%, 100%);
+            --success: hsl(142, 76%, 45%);
+            --success-foreground: hsl(0, 0%, 100%);
+            --warning: hsl(38, 92%, 60%);
+            --warning-foreground: hsl(0, 0%, 100%);
+            --border: hsl(215, 25%, 30%);
+            --input: hsl(215, 25%, 28%);
+            --ring: hsl(200, 95%, 50%)
         }
-        .actions-flex{display:flex;flex-wrap:wrap;gap:12px}
-        .search-box{position:relative}
-        .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);transition:color .2s}
-        .search-box input{padding-left:36px}
-        .search-box input:focus ~ .search-icon{color:var(--primary)}
-        .info-box{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:8px;background:hsla(210,30%,94%,.5);transition:all .2s}
-        .info-box:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,.1)}
-        [data-theme="dark"] .info-box{background:hsla(215,25%,25%,.5)}
-        .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:14px}
-        .info-grid div{padding:4px 0}
-        .summary-box{margin-top:16px;padding:16px;background:var(--muted);border-radius:8px;transition:transform .2s}
-        .summary-box:hover{transform:scale(1.02)}
-        .summary-box p{font-size:14px;color:var(--muted-foreground);margin:4px 0}
-        .summary-box span{font-weight:600;color:var(--foreground)}
-        .theme-toggle{position:relative;width:40px;height:24px;background:var(--muted);border-radius:999px;cursor:pointer;transition:background .3s}
-        .theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--card);border-radius:50%;transition:transform .3s cubic-bezier(0.4, 0, 1, 1),background .3s;box-shadow:0 2px 4px rgba(0,0,0,.2)}
-        [data-theme="dark"] .theme-toggle::after{transform:translateX(16px)}
-        .theme-toggle:active::after{transform:scale(0.9)}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+            transition: background .3s, color .3s
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh
+        }
+
+        .sidebar {
+            width: 256px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1)
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-foreground);
+            font-weight: bold;
+            font-size: 14px;
+            overflow: hidden
+        }
+
+        .sidebar-title h2 {
+            font-size: 18px;
+            font-weight: bold
+        }
+
+        .sidebar-title p {
+            font-size: 12px;
+            color: var(--muted-foreground)
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--foreground);
+            font-weight: 500;
+            transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 4px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity .25s;
+            transform: scaleX(0);
+            transform-origin: left
+        }
+
+        .nav-item:hover {
+            background: var(--secondary);
+            transform: translateY(-1px)
+        }
+
+        .nav-item:hover::before {
+            opacity: 0.1;
+            transform: scaleX(1)
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            box-shadow: 0 4px 12px hsla(200, 95%, 42%, .2)
+        }
+
+        .nav-item.active::before {
+            opacity: 0.2;
+            transform: scaleX(1)
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border)
+        }
+
+        .user-info {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--secondary);
+            margin-bottom: 12px;
+            transition: transform .2s
+        }
+
+        .user-info:hover {
+            transform: translateY(-2px)
+        }
+
+        .user-info p {
+            font-size: 14px;
+            font-weight: 500
+        }
+
+        .user-info small {
+            font-size: 12px;
+            color: var(--muted-foreground)
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--accent);
+            text-transform: capitalize;
+            margin-top: 4px
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .header {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, .2);
+            border-radius: inherit;
+            transform: scale(0);
+            transition: transform .4s cubic-bezier(0.4, 0, 0.2, 1)
+        }
+
+        .btn:active::before {
+            transform: scale(2);
+            opacity: 0
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1)
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--primary-foreground)
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+            transform: scale(1.02)
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--secondary-foreground)
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--foreground)
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--foreground)
+        }
+
+        .btn-ghost:hover {
+            background: var(--secondary);
+            transform: scale(1.05)
+        }
+
+        .btn-icon {
+            padding: 8px;
+            width: 36px;
+            height: 36px
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px
+        }
+
+        .w-full {
+            width: 100%
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px)
+        }
+
+        .card.animate {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 10px 10px -5px rgba(0, 0, 0, .04)
+        }
+
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: var(--muted-foreground);
+            margin-top: 4px
+        }
+
+        .card-content {
+            padding: 24px
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            position: relative
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            transition: all .2s;
+            transform-origin: left
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--background);
+            font-size: 14px;
+            color: var(--foreground);
+            transition: all .25s cubic-bezier(0.4, 0, 0.2, 1)
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 3px hsla(200, 95%, 42%, .2);
+            transform: scale(1.02)
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr)
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr)
+        }
+
+        .grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr)
+        }
+
+        .table-container {
+            overflow-x: auto
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px
+        }
+
+        .table thead tr {
+            opacity: 1 !important;
+            transform: none !important
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px;
+            background: var(--muted);
+            font-weight: 600;
+            color: var(--foreground);
+            border-bottom: 1px solid var(--border);
+            opacity: 1 !important
+        }
+
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            transition: background .2s;
+            color: var(--foreground);
+            vertical-align: top
+        }
+
+        .table tbody tr.data-animate {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all .3s
+        }
+
+        .table tbody tr.data-animate.animate {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .table tr:hover {
+            background: hsla(210, 30%, 94%, .5);
+            transform: translateY(-1px)
+        }
+
+        [data-theme="dark"] .table tr:hover {
+            background: hsla(215, 25%, 30%, .5)
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: transform .2s
+        }
+
+        .badge:hover {
+            transform: scale(1.1)
+        }
+
+        .badge-success {
+            background: hsla(142, 76%, 36%, .1);
+            color: var(--success)
+        }
+
+        .badge-warning {
+            background: hsla(38, 92%, 50%, .1);
+            color: var(--warning)
+        }
+
+        .badge-destructive {
+            background: hsla(0, 72%, 51%, .1);
+            color: var(--destructive)
+        }
+
+        .badge-secondary {
+            background: var(--secondary);
+            color: var(--secondary-foreground)
+        }
+
+        .metric-card {
+            padding: 20px;
+            text-align: center;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.02)
+            }
+        }
+
+        .metric-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--muted-foreground)
+        }
+
+        .metric-card-title {
+            font-weight: 500
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            transition: transform .3s
+        }
+
+        .metric-card:hover .metric-value {
+            transform: scale(1.1)
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--muted-foreground)
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+            opacity: 0;
+            animation: fadeIn .3s forwards
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1
+            }
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, .1);
+            transform: scale(0.9);
+            animation: modalPop .3s cubic-bezier(0.4, 0, 0.2, 1) forwards
+        }
+
+        @keyframes modalPop {
+            to {
+                transform: scale(1)
+            }
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: var(--muted-foreground);
+            margin-top: 4px
+        }
+
+        .modal-content {
+            padding: 24px
+        }
+
+        .flex {
+            display: flex
+        }
+
+        .flex-col {
+            flex-direction: column
+        }
+
+        .items-center {
+            align-items: center
+        }
+
+        .justify-between {
+            justify-content: space-between
+        }
+
+        .gap-1 {
+            gap: 4px
+        }
+
+        .gap-2 {
+            gap: 8px
+        }
+
+        .gap-3 {
+            gap: 12px
+        }
+
+        .gap-4 {
+            gap: 16px
+        }
+
+        .space-y-4>*+* {
+            margin-top: 16px
+        }
+
+        .space-y-6>*+* {
+            margin-top: 24px
+        }
+
+        .mt-4 {
+            margin-top: 16px
+        }
+
+        .mb-4 {
+            margin-bottom: 16px
+        }
+
+        .text-center {
+            text-align: center
+        }
+
+        .font-mono {
+            font-family: monospace
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, hsla(200, 95%, 42%, .1), var(--background), hsla(185, 85%, 50%, .1));
+            padding: 16px;
+            transition: background .3s
+        }
+
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px)
+        }
+
+        .login-card.animate {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity .6s ease-out, transform .6s ease-out
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-foreground);
+            font-size: 32px;
+            font-weight: bold;
+            transition: transform .3s
+        }
+
+        .login-logo:hover {
+            transform: rotate(360deg)
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 24px
+        }
+
+        .demo-credentials {
+            margin-top: 24px;
+            padding: 16px;
+            background: var(--muted);
+            border-radius: 8px;
+            transition: transform .2s
+        }
+
+        .demo-credentials:hover {
+            transform: translateY(-2px)
+        }
+
+        .demo-credentials p {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            margin: 4px 0
+        }
+
+        .demo-credentials p:first-child {
+            font-weight: 500;
+            margin-bottom: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 2000
+        }
+
+        .toast {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1);
+            min-width: 300px;
+            animation: slideIn .3s ease, fadeOut 0.3s 2.7s forwards
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%)
+            }
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px
+        }
+
+        .toast-description {
+            font-size: 14px;
+            color: var(--muted-foreground)
+        }
+
+        .toast.error {
+            border-color: var(--destructive)
+        }
+
+        .toast.error .toast-title {
+            color: var(--destructive)
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 16px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all .6s
+        }
+
+        .chart-container.animate {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .mobile-menu-btn {
+            display: none
+        }
+
+        @media(max-width:1024px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0)
+            }
+
+            .mobile-menu-btn {
+                display: block
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, .5);
+                backdrop-filter: blur(4px);
+                z-index: 99;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity .3s
+            }
+
+            .sidebar-overlay.open {
+                opacity: 1;
+                visibility: visible
+            }
+        }
+
+        .actions-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .search-box {
+            position: relative
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-foreground);
+            transition: color .2s
+        }
+
+        .search-box input {
+            padding-left: 36px
+        }
+
+        .search-box input:focus~.search-icon {
+            color: var(--primary)
+        }
+
+        .info-box {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: hsla(210, 30%, 94%, .5);
+            transition: all .2s
+        }
+
+        .info-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .1)
+        }
+
+        [data-theme="dark"] .info-box {
+            background: hsla(215, 25%, 25%, .5)
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 14px
+        }
+
+        .info-grid div {
+            padding: 4px 0
+        }
+
+        .summary-box {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--muted);
+            border-radius: 8px;
+            transition: transform .2s
+        }
+
+        .summary-box:hover {
+            transform: scale(1.02)
+        }
+
+        .summary-box p {
+            font-size: 14px;
+            color: var(--muted-foreground);
+            margin: 4px 0
+        }
+
+        .summary-box span {
+            font-weight: 600;
+            color: var(--foreground)
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 40px;
+            height: 24px;
+            background: var(--muted);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background .3s
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--card);
+            border-radius: 50%;
+            transition: transform .3s cubic-bezier(0.4, 0, 1, 1), background .3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .2)
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            transform: translateX(16px)
+        }
+
+        .theme-toggle:active::after {
+            transform: scale(0.9)
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 0 16px;
             }
+
             .content {
                 padding: 16px;
             }
+
             .card-header,
             .card-content {
                 padding: 16px;
             }
+
             .grid-cols-2,
             .grid-cols-3,
             .grid-cols-4 {
                 grid-template-columns: 1fr;
             }
+
             .metric-card {
                 padding: 16px;
             }
+
             .table th,
             .table td {
                 padding: 8px 4px;
                 font-size: 13px;
             }
+
             .nav-item {
                 padding: 12px 12px;
                 font-size: 14px;
             }
+
             .sidebar-header {
                 padding: 16px;
             }
+
             .form-input,
             .form-select,
             .form-textarea {
                 font-size: 16px;
             }
+
             td.flex {
                 flex-direction: column !important;
                 gap: 4px;
             }
+
             td.flex .btn {
                 width: 100%;
                 justify-content: center;
             }
+
             .actions-flex {
                 flex-direction: column;
             }
+
             .actions-flex .btn {
                 width: 100%;
             }
+
             .modal {
                 max-width: 95vw;
                 margin: 0 auto;
             }
+
             .login-container {
                 padding: 8px;
             }
         }
+
         @media (max-width: 480px) {
             .toast {
                 min-width: auto;
@@ -241,164 +1051,972 @@
                 right: 16px;
                 left: 16px;
             }
+
             h1 {
                 font-size: 18px;
             }
+
             .card-title {
                 font-size: 16px;
             }
         }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0
+        }
+
+        .currency-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--background);
+            color: var(--foreground);
+            font-size: 14px;
+            cursor: pointer
+        }
+
+        .page-split {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            align-items: start
+        }
+
+        .page-split.preview-open {
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px)
+        }
+
+        @media(max-width:1024px) {
+            .page-split.preview-open {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .preview-panel {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--card);
+            position: sticky;
+            top: 8px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .08)
+        }
+
+        .preview-panel .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .preview-panel .preview-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--muted-foreground)
+        }
+
+        .tr-clickable {
+            cursor: pointer
+        }
+
+        .tr-selected td {
+            background: hsla(200, 95%, 42%, .12) !important
+        }
+
+        .table tr.month-row {
+            opacity: 1 !important;
+            transform: none !important
+        }
+
+        .table tr.month-row-toggle {
+            cursor: pointer;
+            pointer-events: auto !important
+        }
+
+        .table tr.month-row-toggle:hover td.month-header-cell {
+            filter: brightness(1.05)
+        }
+
+        .table tr.month-row td.month-header-cell {
+            background: linear-gradient(90deg, hsl(200, 95%, 42%), hsl(185, 85%, 50%));
+            color: #fff;
+            padding: 14px 16px;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px solid hsl(200, 95%, 38%) !important;
+            text-align: left
+        }
+
+        [data-theme="dark"] .table tr.month-row td.month-header-cell {
+            background: linear-gradient(90deg, hsl(200, 95%, 38%), hsl(185, 85%, 45%))
+        }
+
+        .table tr.month-data-row {
+            opacity: 1 !important;
+            transform: none !important
+        }
+
+        .table tr.month-data-row td {
+            color: var(--foreground);
+            background: var(--card)
+        }
+
+        .table tr.month-data-row.month-hidden {
+            display: none !important
+        }
+
+        .month-toggle-icon {
+            display: inline-block;
+            width: 18px;
+            margin-right: 6px
+        }
+
+        .month-profit-badge {
+            float: right;
+            background: hsla(142, 76%, 36%, .35);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid hsla(142, 76%, 36%, .5)
+        }
+
+        [data-theme="dark"] .month-profit-badge {
+            background: hsla(142, 76%, 36%, .45)
+        }
+
+        .partial-pay-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            align-items: end;
+            margin-bottom: 8px
+        }
+
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: flex-end
+        }
+
+        .filters-bar .form-group {
+            margin-bottom: 0;
+            min-width: 140px;
+            flex: 1
+        }
+
+        .icon-btn {
+            padding: 6px 8px;
+            min-width: 32px;
+            justify-content: center
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center
+        }
+
+        .upcoming-urgent td {
+            background: hsla(38, 92%, 50%, .22) !important
+        }
+
+        .upcoming-urgent td:first-child {
+            border-left: 4px solid var(--warning)
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap
+        }
+
+        .sub-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--background);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px
+        }
+
+        .sub-tab.active {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border-color: var(--primary)
+        }
+
+        .export-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px
+        }
+
+        .form-actions .btn {
+            flex: 1
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid var(--border)
+        }
+
+        .password-wrap {
+            position: relative;
+            display: flex;
+            align-items: center
+        }
+
+        .password-wrap .form-input {
+            padding-right: 44px
+        }
+
+        .pwd-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 4px;
+            color: var(--muted-foreground)
+        }
+
+        .auth-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 16px;
+            font-size: 14px
+        }
+
+        .auth-links a {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline
+        }
+
+        .otp-box {
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 8px;
+            background: hsla(38, 92%, 50%, .15);
+            border: 1px solid var(--warning);
+            font-size: 14px
+        }
+
+        .otp-box strong {
+            font-family: monospace;
+            font-size: 18px;
+            letter-spacing: 4px
+        }
+
+        /* Settings page */
+        .settings-section {
+            margin-bottom: 24px
+        }
+
+        .settings-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--muted-foreground);
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .settings-row:last-child {
+            border-bottom: none
+        }
+
+        .settings-row-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px
+        }
+
+        .settings-row-desc {
+            font-size: 13px;
+            color: var(--muted-foreground)
+        }
     </style>
 </head>
+
 <body>
-<div id="app"></div>
+    <div id="app"></div>
+    <script type="module" src="firebase-init.js"></script>
 
-<script>
-/* ---------- Theme Manager ---------- */
-const Theme = {
-    init() {
-        const saved = localStorage.getItem('ajTravelsTheme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
-        this.setTheme(theme);
-    },
-    setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('ajTravelsTheme', theme);
-        this.updateToggle();
-    },
-    toggle() {
-        const current = document.documentElement.getAttribute('data-theme') || 'light';
-        this.setTheme(current === 'light' ? 'dark' : 'light');
-    },
-    renderToggle() {
-        if (document.getElementById('themeToggle')) return;
-        const header = document.querySelector('.header');
-        if (!header) return;
-        const toggle = document.createElement('button');
-        toggle.id = 'themeToggle';
-        toggle.className = 'btn btn-ghost btn-icon theme-toggle';
-        toggle.title = 'Toggle dark/light mode';
-        toggle.onclick = () => this.toggle();
-        header.appendChild(toggle);
-        this.updateToggle();
-    },
-    updateToggle() {
-        const toggle = document.getElementById('themeToggle');
-        if (!toggle) return;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        toggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-    }
-};
-
-/* ---------- Storage ---------- */
-const Storage = {
-    INQUIRIES_KEY: 'ajTravelsInquiries',
-    BOOKINGS_KEY: 'ajTravelsBookings',
-    EMPLOYEES_KEY: 'ajTravelsEmployees',
-
-    initializeDemoData() {
-        if (!localStorage.getItem(this.INQUIRIES_KEY)) {
-            const demoInquiries = [
-                { id: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryFor: 'Tickets', description: 'Need tickets to London', destination: 'London', travelDate: '2025-12-15', status: 'Under Process', inquiryDate: new Date().toISOString(), employeeId: '2', employeeName: 'Employee User' },
-                { id: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryFor: 'Tour Package', description: 'Family vacation package to Dubai', destination: 'Dubai', travelDate: '2025-11-20', status: 'Successful', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), employeeId: '2', employeeName: 'Employee User' }
-            ];
-            localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(demoInquiries));
-        }
-        if (!localStorage.getItem(this.BOOKINGS_KEY)) {
-            const demoBookings = [
-                { id: 'BK001', inquiryId: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), invoiceNumber: 'INV-2025-001', airlinePNR: 'ABC123', gdsPNR: 'GDS456', bookingDetails: '2 Adults, 1 Child - Dubai Premium Package', paymentStatus: 'Successful', amount: 3500, currency: 'USD', paymentMode: 'Card', employeeId: '2', employeeName: 'Employee User', destination: 'Dubai', travelDate: '2025-11-20' }
-            ];
-            localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(demoBookings));
-        }
-        if (!localStorage.getItem(this.EMPLOYEES_KEY)) {
-            const demoEmployees = [
-                { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin' },
-                { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee' }
-            ];
-            localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(demoEmployees));
-        }
-    },
-
-    getInquiries() { this.initializeDemoData(); const d = localStorage.getItem(this.INQUIRIES_KEY); return d ? JSON.parse(d) : []; },
-    saveInquiry(i) { const a = this.getInquiries(); const idx = a.findIndex(x=>x.id===i.id); idx>=0?a[idx]=i:a.push(i); localStorage.setItem(this.INQUIRIES_KEY,JSON.stringify(a)); },
-    deleteInquiry(id) { let a = this.getInquiries(); a = a.filter(x => x.id !== id); localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(a)); },
-    getBookings() { this.initializeDemoData(); const d = localStorage.getItem(this.BOOKINGS_KEY); return d ? JSON.parse(d) : []; },
-    saveBooking(b) { const a = this.getBookings(); const idx = a.findIndex(x=>x.id===b.id); idx>=0?a[idx]=b:a.push(b); localStorage.setItem(this.BOOKINGS_KEY,JSON.stringify(a)); },
-    getEmployees() { this.initializeDemoData(); const d = localStorage.getItem(this.EMPLOYEES_KEY); return d ? JSON.parse(d) : []; },
-    saveEmployee(e) { const a = this.getEmployees(); const idx = a.findIndex(x=>x.id===e.id); idx>=0?a[idx]=e:a.push(e); localStorage.setItem(this.EMPLOYEES_KEY,JSON.stringify(a)); }
-};
-
-/* ---------- Auth ---------- */
-const Auth = {
-    USER_KEY: 'ajTravelsUser', currentUser: null,
-    init() { const s = localStorage.getItem(this.USER_KEY); if(s) this.currentUser = JSON.parse(s); },
-    login(email,password){
-        const demo = {
-            'admin@ajtravels.com': {id:'1',name:'Admin User',email:'admin@ajtravels.com',role:'admin'},
-            'employee@ajtravels.com': {id:'2',name:'Employee User',email:'employee@ajtravels.com',role:'employee'}
+    <script>
+        /* ---------- Theme Manager ---------- */
+        const Theme = {
+            init() {
+                const saved = localStorage.getItem('ajTravelsTheme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = saved || (prefersDark ? 'dark' : 'light');
+                this.setTheme(theme);
+            },
+            setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('ajTravelsTheme', theme);
+                this.updateToggle();
+            },
+            toggle() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                this.setTheme(current === 'light' ? 'dark' : 'light');
+            },
+            renderToggle() {
+                const header = document.querySelector('.header');
+                if (!header) return;
+                let actions = header.querySelector('.header-actions');
+                if (!actions) {
+                    actions = document.createElement('div');
+                    actions.className = 'header-actions';
+                    header.appendChild(actions);
+                }
+                if (!document.getElementById('currencySelect')) {
+                    const sel = document.createElement('select');
+                    sel.id = 'currencySelect';
+                    sel.className = 'currency-select';
+                    sel.title = 'Portal currency';
+                    sel.innerHTML = Currency.optionsHtml();
+                    sel.value = Currency.getCode();
+                    sel.onchange = () => { Currency.set(sel.value); Currency.refreshDisplayedAmounts(); };
+                    actions.appendChild(sel);
+                }
+                if (!document.getElementById('themeToggle')) {
+                    const toggle = document.createElement('button');
+                    toggle.id = 'themeToggle';
+                    toggle.className = 'btn btn-ghost btn-icon theme-toggle';
+                    toggle.title = 'Toggle dark/light mode';
+                    toggle.onclick = () => this.toggle();
+                    actions.appendChild(toggle);
+                }
+                this.updateToggle();
+            },
+            updateToggle() {
+                const toggle = document.getElementById('themeToggle');
+                if (!toggle) return;
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                toggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+            }
         };
-        if(demo[email] && password==='password'){
-            this.currentUser = demo[email];
-            localStorage.setItem(this.USER_KEY,JSON.stringify(this.currentUser));
-            return {success:true};
-        }
-        return {success:false,error:'Invalid credentials'};
-    },
-    logout(){ this.currentUser=null; localStorage.removeItem(this.USER_KEY); },
-    isAuthenticated(){ return this.currentUser!==null; },
-    getUser(){ return this.currentUser; }
-};
-Auth.init();
 
-/* ---------- Utils ---------- */
-const Utils = {
-    showToast(title,desc,type='success'){
-        const c = document.querySelector('.toast-container')||this.createToastContainer();
-        const t = document.createElement('div');
-        t.className=`toast ${type}`;
-        t.innerHTML=`<div class="toast-title">${title}</div><div class="toast-description">${desc}</div>`;
-        c.appendChild(t);
-        setTimeout(()=>t.remove(),3000);
-    },
-    createToastContainer(){
-        const c=document.createElement('div');
-        c.className='toast-container';
-        document.body.appendChild(c);
-        return c;
-    },
-    formatDate(d){ return new Date(d).toLocaleDateString(); },
-    formatCurrency(a,c='USD'){ return `${c} ${Number(a).toLocaleString()}`; },
-    getStatusBadgeClass(s){
-        const m={'Successful':'badge-success','Under Process':'badge-warning','Unsuccessful':'badge-destructive','Pending':'badge-warning'};
-        return m[s]||'badge-secondary';
-    }
-};
+        /* ---------- Currency ---------- */
+        const Currency = {
+            KEY: 'ajTravelsCurrency',
+            OPTIONS: [
+                { code: 'INR', label: 'Indian Rupee (₹)', symbol: '₹' },
+                { code: 'GBP', label: 'Pound (£)', symbol: '£' },
+                { code: 'USD', label: 'Dollar ($)', symbol: '$' }
+            ],
+            optionsHtml() {
+                return this.OPTIONS.map(o => `<option value="${o.code}">${o.label}</option>`).join('');
+            },
+            getCode() {
+                return localStorage.getItem(this.KEY) || 'INR';
+            },
+            get() {
+                return this.OPTIONS.find(o => o.code === this.getCode()) || this.OPTIONS[0];
+            },
+            set(code) {
+                localStorage.setItem(this.KEY, code);
+                Utils.showToast('Currency', `Display set to ${this.get().label}`);
+            },
+            refreshDisplayedAmounts() {
+                const page = window.location.hash.slice(1) || 'dashboard';
+                Router.navigate(page);
+            }
+        };
 
-/* ---------- Modal ---------- */
-const Modal = {
-    show(title,content,desc=''){
-        const o=document.createElement('div');
-        o.className='modal-overlay';
-        o.innerHTML=`
+        /* ---------- Storage ---------- */
+        const Storage = {
+            INQUIRIES_KEY: 'ajTravelsInquiries',
+            BOOKINGS_KEY: 'ajTravelsBookings',
+            EMPLOYEES_KEY: 'ajTravelsEmployees',
+
+            initializeDemoData() {
+                if (!localStorage.getItem(this.INQUIRIES_KEY)) {
+                    const demoInquiries = [
+                        { id: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryFor: 'Tickets', fromLocation: 'Mumbai', description: 'Need tickets to London', destination: 'London', travelDate: '2026-12-15', status: 'Under Process', inquiryDate: new Date().toISOString(), employeeId: '2', employeeName: 'Employee User' },
+                        { id: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryFor: 'Tour Package', fromLocation: 'Delhi', description: 'Family vacation package to Dubai', destination: 'Dubai', travelDate: '2026-03-01', status: 'Successful', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), employeeId: '2', employeeName: 'Employee User' }
+                    ];
+                    localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(demoInquiries));
+                }
+                if (!localStorage.getItem(this.BOOKINGS_KEY)) {
+                    const demoBookings = [
+                        { id: 'BK001', inquiryId: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), issuedDate: new Date(Date.now() - 86400000).toISOString().slice(0, 10), closingDate: new Date(Date.now() - 86400000).toISOString().slice(0, 10), invoiceNumber: 'INV-2025-001', airlinePNR: 'ABC123', gdsPNR: 'GDS456', bookingDetails: '2 Adults, 1 Child - Dubai Premium Package', paymentStatus: 'Paid', amount: 3500, salesAmount: 4200, paidAmount: 4200, currency: 'USD', paymentMode: 'Card', remarks: '', employeeId: '2', employeeName: 'Employee User', destination: 'Dubai', fromLocation: 'Delhi', travelDate: '2026-08-15', inquiryFor: 'Tour Package' },
+                        { id: 'BK002', inquiryId: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryDate: new Date().toISOString(), issuedDate: new Date().toISOString().slice(0, 10), closingDate: new Date().toISOString().slice(0, 10), invoiceNumber: 'INV-2026-002', airlinePNR: 'LDN99', gdsPNR: 'GDS99', bookingDetails: 'Economy return LHR', paymentStatus: 'Pending', amount: 1200, salesAmount: 1500, currency: 'USD', paymentMode: '', remarks: 'Awaiting payment', employeeId: '2', employeeName: 'Employee User', destination: 'London', fromLocation: 'Mumbai', travelDate: '2026-10-05', inquiryFor: 'Tickets' },
+                        { id: 'BK003', inquiryId: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryDate: new Date().toISOString(), issuedDate: new Date().toISOString().slice(0, 10), closingDate: new Date().toISOString().slice(0, 10), invoiceNumber: 'INV-2026-003', airlinePNR: 'SEP01', gdsPNR: 'GDS01', bookingDetails: 'Business class — Mumbai to Singapore', paymentStatus: 'Paid', amount: 2000, salesAmount: 2600, paidAmount: 2600, currency: 'USD', paymentMode: 'Card', remarks: '', employeeId: '2', employeeName: 'Employee User', destination: 'Singapore', fromLocation: 'Mumbai', travelDate: '2026-09-30', inquiryFor: 'Tickets' }
+                    ];
+                    localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(demoBookings));
+                }
+                if (!localStorage.getItem(this.EMPLOYEES_KEY)) {
+                    const demoEmployees = [
+                        { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin' },
+                        { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee' }
+                    ];
+                    localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(demoEmployees));
+                }
+            },
+
+            _writeInquiries(a) { localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(a)); },
+            _writeBookings(a) { localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(a)); },
+            _writeEmployees(a) { localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(a)); },
+            getInquiries() { this.initializeDemoData(); const d = localStorage.getItem(this.INQUIRIES_KEY); return d ? JSON.parse(d) : []; },
+            saveInquiry(i) { const a = this.getInquiries(); const idx = a.findIndex(x => x.id === i.id); idx >= 0 ? a[idx] = i : a.push(i); this._writeInquiries(a); FirestoreSync.saveDoc('inquiries', i.id, i); },
+            deleteInquiry(id) { let a = this.getInquiries(); a = a.filter(x => x.id !== id); this._writeInquiries(a); FirestoreSync.deleteDoc('inquiries', id); },
+            getBookings() { this.initializeDemoData(); const d = localStorage.getItem(this.BOOKINGS_KEY); return d ? JSON.parse(d) : []; },
+            saveBooking(b) { const a = this.getBookings(); const idx = a.findIndex(x => x.id === b.id); idx >= 0 ? a[idx] = b : a.push(b); this._writeBookings(a); FirestoreSync.saveDoc('bookings', b.id, b); },
+            deleteBooking(id) { let a = this.getBookings(); a = a.filter(x => x.id !== id); this._writeBookings(a); FirestoreSync.deleteDoc('bookings', id); },
+            getEmployees() { this.initializeDemoData(); const d = localStorage.getItem(this.EMPLOYEES_KEY); return d ? JSON.parse(d) : []; },
+            saveEmployee(e) { const a = this.getEmployees(); const idx = a.findIndex(x => x.id === e.id); idx >= 0 ? a[idx] = e : a.push(e); this._writeEmployees(a); FirestoreSync.saveDoc('employees', e.id, e); },
+            replaceAll(data) {
+                if (data.inquiries) this._writeInquiries(data.inquiries);
+                if (data.bookings) this._writeBookings(data.bookings);
+                if (data.employees) this._writeEmployees(data.employees);
+            }
+        };
+
+        const FirestoreSync = {
+            enabled: false,
+            dbAvailable: null, // null=unknown, true=ok, false=not found
+            // One-time DB availability probe using REST API — no WebChannel, no retry loops
+            async probe() {
+                if (this.dbAvailable !== null) return; // already known, skip
+                const F = window.Firebase;
+                if (!F?.db) { this.dbAvailable = false; return; }
+                try {
+                    // Use REST API — simple HTTP GET, no SDK WebChannel
+                    const projectId = F.app.options.projectId;
+                    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/__ping__?pageSize=1`;
+                    const res = await fetch(url);
+                    if (res.status === 404) {
+                        this.dbAvailable = false;
+                        // Terminate the SDK Firestore instance to prevent retry loops
+                        try { await F.terminate(F.db); } catch (_) {}
+                        F.db = null;
+                        console.info('AJ Travels: Firestore not provisioned — running in local-only mode.');
+                    } else {
+                        // 200, 400, 403 all mean DB exists (403 = permission denied but DB is there)
+                        this.dbAvailable = true;
+                    }
+                } catch (e) {
+                    // Network error — assume DB might be available, try anyway
+                    this.dbAvailable = true;
+                }
+            },
+            async init() {
+                if (!window.Firebase?.db) return;
+                await this.probe(); // ensure availability is known
+                if (!this.dbAvailable) return;
+                this.enabled = true;
+                await this.pullAll();
+            },
+
+            async pullAll() {
+                if (!this.enabled) return;
+                const F = window.Firebase;
+                if (!F?.db) return;
+                const snap = async (name) => {
+                    const s = await F.getDocs(F.collection(F.db, name));
+                    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+                };
+                try {
+                    const [inquiries, bookings, employees] = await Promise.all([
+                        snap('inquiries'), snap('bookings'), snap('employees')
+                    ]);
+                    if (inquiries.length || bookings.length || employees.length) {
+                        Storage.replaceAll({ inquiries, bookings, employees: employees.length ? employees : Storage.getEmployees() });
+                    } else {
+                        await this.pushSeedFromLocal();
+                    }
+                } catch (e) {
+                    if (!(e?.message || '').includes('not found'))
+                        console.warn('Firestore pull failed', e);
+                }
+            },
+            async pushSeedFromLocal() {
+                if (!this.enabled) return;
+                const F = window.Firebase;
+                Storage.initializeDemoData();
+                for (const i of Storage.getInquiries()) await this.saveDoc('inquiries', i.id, i);
+                for (const b of Storage.getBookings()) await this.saveDoc('bookings', b.id, b);
+                for (const e of Storage.getEmployees()) await this.saveDoc('employees', e.id, e);
+            },
+            async saveDoc(col, id, data) {
+                if (!this.enabled || !window.Firebase?.db) return;
+                try {
+                    const F = window.Firebase;
+                    await F.setDoc(F.doc(F.db, col, id), { ...data, updatedAt: new Date().toISOString() });
+                } catch (e) {
+                    if (!(e?.message || '').includes('not found'))
+                        console.warn('Firestore save', col, e);
+                }
+            },
+            async deleteDoc(col, id) {
+                if (!this.enabled || !window.Firebase?.db) return;
+                try {
+                    const F = window.Firebase;
+                    await F.deleteDoc(F.doc(F.db, col, id));
+                } catch (e) {
+                    if (!(e?.message || '').includes('not found'))
+                        console.warn('Firestore delete', col, e);
+                }
+            },
+            normalizeContact(c) { return String(c || '').replace(/\D/g, ''); },
+            async resolveEmail(identifier) {
+                const id = String(identifier || '').trim();
+                if (id.includes('@')) return id;
+                if (!this.enabled) throw new Error('Use your email address to login.');
+                const F = window.Firebase;
+                if (!F?.db) throw new Error('Firebase not ready');
+                const key = this.normalizeContact(id);
+                const snap = await F.getDoc(F.doc(F.db, 'contactIndex', key));
+                if (snap.exists()) return snap.data().email;
+                throw new Error('No account found for this contact. Use your email.');
+            }
+        };
+
+        /* ---------- Auth ---------- */
+        const Auth = {
+            USER_KEY: 'ajTravelsUser', currentUser: null, firebaseUser: null,
+            init() { const s = localStorage.getItem(this.USER_KEY); if (s) this.currentUser = JSON.parse(s); },
+            setUser(u) { this.currentUser = u; if (u) localStorage.setItem(this.USER_KEY, JSON.stringify(u)); else localStorage.removeItem(this.USER_KEY); },
+            // Unified login: tries Firebase first, falls back to demo accounts
+            async login(identifier, password) {
+                const F = window.Firebase;
+                // Try Firebase Auth first if available
+                if (F) {
+                    try {
+                        const email = identifier.includes('@') ? identifier : await FirestoreSync.resolveEmail(identifier).catch(() => identifier);
+                        const cred = await F.signInWithEmailAndPassword(F.auth, email, password);
+                        this.firebaseUser = cred.user;
+                        let name = cred.user.displayName || cred.user.email;
+                        let role = 'employee';
+                        let contact = '';
+                        // Only try Firestore if we already KNOW it's available (probe ran at startup)
+                        if (FirestoreSync.dbAvailable === true && F.db) {
+                            try {
+                                const prof = await F.getDoc(F.doc(F.db, 'users', cred.user.uid));
+                                if (prof.exists()) {
+                                    const p = prof.data();
+                                    name = p.fullName || name;
+                                    role = p.role || role;
+                                    contact = p.contact || '';
+                                }
+                            } catch (_) { }
+                        }
+                        this.setUser({ id: cred.user.uid, name, email: cred.user.email, contact, role, source: 'firebase' });
+                        if (FirestoreSync.dbAvailable === true) await FirestoreSync.init();
+                        return { success: true };
+                    } catch (fbErr) {
+                        // If Firebase auth failed with a real auth error, report it
+                        const code = fbErr?.code || '';
+                        if (code.startsWith('auth/') && !code.includes('network') && !code.includes('unavailable')) {
+                            // Check if this is a demo fallback account first
+                            const demoResult = this._demoLogin(identifier, password);
+                            if (demoResult.success) return demoResult;
+                            return { success: false, error: this._friendlyAuthError(code) };
+                        }
+                        // Network / other error — try demo fallback
+                    }
+                }
+                // Demo fallback
+                return this._demoLogin(identifier, password);
+            },
+            _demoLogin(email, password) {
+                const demo = {
+                    'admin@ajtravels.com': { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin', source: 'demo' },
+                    'employee@ajtravels.com': { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee', source: 'demo' }
+                };
+                if (demo[email] && password === 'password') {
+                    this.setUser(demo[email]);
+                    return { success: true };
+                }
+                return { success: false, error: 'Incorrect email or password' };
+            },
+            _friendlyAuthError(code) {
+                const map = {
+                    'auth/user-not-found': 'No account found with this email.',
+                    'auth/wrong-password': 'Incorrect password.',
+                    'auth/invalid-credential': 'Incorrect email or password.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
+                    'auth/user-disabled': 'This account has been disabled.'
+                };
+                return map[code] || 'Login failed. Please try again.';
+            },
+            async signupFirebase({ fullName, contact, email, password, otp, expectedOtp }) {
+                if (String(otp).trim() !== String(expectedOtp)) return { success: false, error: 'Invalid OTP' };
+                const F = window.Firebase;
+                if (!F) return { success: false, error: 'Firebase not ready' };
+                let cred;
+                try {
+                    cred = await F.createUserWithEmailAndPassword(F.auth, email, password);
+                } catch (e) {
+                    // Map auth errors — e.g. email-already-in-use
+                    return { success: false, error: this._friendlyAuthError(e?.code) || e.message || 'Signup failed' };
+                }
+                // Auth account created — now try Firestore profile (best-effort, non-blocking)
+                const uid = cred.user.uid;
+                const profile = { fullName, contact, email, role: 'employee', createdAt: new Date().toISOString() };
+                if (FirestoreSync.dbAvailable === true && F.db) {
+                    try {
+                        await F.setDoc(F.doc(F.db, 'users', uid), profile);
+                        const cKey = FirestoreSync.normalizeContact(contact);
+                        if (cKey) await F.setDoc(F.doc(F.db, 'contactIndex', cKey), { email, uid });
+                    } catch (_) { /* Firestore optional — don't fail signup */ }
+                }
+                this.firebaseUser = cred.user;
+                this.setUser({ id: uid, name: fullName, email, contact, role: 'employee', source: 'firebase' });
+                if (FirestoreSync.dbAvailable === true) await FirestoreSync.init();
+                return { success: true };
+            },
+            async deleteAccount() {
+                const F = window.Firebase;
+                const user = this.currentUser;
+                // Get current firebase user from auth state (handles page-refresh case)
+                const fbUser = this.firebaseUser || F?.auth?.currentUser;
+                // Delete Firestore user data if available
+                if (F && fbUser && FirestoreSync.dbAvailable === true && F.db) {
+                    try {
+                        await F.deleteDoc(F.doc(F.db, 'users', fbUser.uid));
+                        const cKey = FirestoreSync.normalizeContact(user?.contact || '');
+                        if (cKey) await F.deleteDoc(F.doc(F.db, 'contactIndex', cKey));
+                    } catch (_) { }
+                }
+                // Delete Firebase Auth account (permanent)
+                if (F && fbUser) {
+                    try {
+                        await fbUser.delete();
+                    } catch (e) {
+                        if (e?.code === 'auth/requires-recent-login')
+                            return { success: false, error: 'For security, please log out and log back in before deleting your account.' };
+                        return { success: false, error: e.message || 'Failed to delete Firebase account' };
+                    }
+                }
+                this.firebaseUser = null;
+                this.setUser(null);
+                FirestoreSync.enabled = false;
+                return { success: true };
+            },
+            async logout() {
+                if (window.Firebase?.auth && Auth.firebaseUser) {
+                    try { await window.Firebase.signOut(window.Firebase.auth); } catch (_) { }
+                }
+                this.firebaseUser = null;
+                this.setUser(null);
+                FirestoreSync.enabled = false;
+            },
+            isAuthenticated() { return this.currentUser !== null; },
+            getUser() { return this.currentUser; }
+        };
+        Auth.init();
+
+        /* ---------- Utils ---------- */
+        const Utils = {
+            showToast(title, desc, type = 'success') {
+                const c = document.querySelector('.toast-container') || this.createToastContainer();
+                const t = document.createElement('div');
+                t.className = `toast ${type}`;
+                t.innerHTML = `<div class="toast-title">${title}</div><div class="toast-description">${desc}</div>`;
+                c.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            },
+            createToastContainer() {
+                const c = document.createElement('div');
+                c.className = 'toast-container';
+                document.body.appendChild(c);
+                return c;
+            },
+            formatDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString(); },
+            escapeHtml(s) { if (s == null) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); },
+            passwordInput(id, placeholder = '') {
+                return `<div class="password-wrap"><input type="password" id="${id}" class="form-input" placeholder="${placeholder}" required><button type="button" class="pwd-toggle" tabindex="-1" onclick="Utils.togglePassword('${id}', this)" aria-label="Show password">👁</button></div>`;
+            },
+            togglePassword(id, btn) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const show = el.type === 'password';
+                el.type = show ? 'text' : 'password';
+                btn.textContent = show ? '🙈' : '👁';
+            },
+            formatCurrency(a) {
+                const sym = Currency.get().symbol;
+                const n = Number(a);
+                if (Number.isNaN(n)) return `${sym} 0`;
+                return `${sym} ${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+            },
+            monthKey(d) { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`; },
+            monthLabel(key) { const [y, m] = key.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' }); },
+            startOfMonth(d) { const x = new Date(d); return new Date(x.getFullYear(), x.getMonth(), 1); },
+            endOfMonth(d) { const x = new Date(d); return new Date(x.getFullYear(), x.getMonth() + 1, 0, 23, 59, 59, 999); },
+            daysUntil(dateStr) {
+                const t = new Date(); t.setHours(0, 0, 0, 0);
+                const tr = this.parseDateOnly(dateStr);
+                if (!tr) return NaN;
+                return Math.round((tr - t) / 86400000);
+            },
+            parseDateOnly(s) {
+                if (!s) return null;
+                const p = String(s).slice(0, 10).split('-').map(Number);
+                if (p.length < 3 || p.some(n => Number.isNaN(n))) return null;
+                return new Date(p[0], p[1] - 1, p[2]);
+            },
+            compareDateOnly(a, b) {
+                const da = this.parseDateOnly(a), db = this.parseDateOnly(b);
+                if (!da || !db) return 0;
+                return da.getTime() - db.getTime();
+            },
+            isTravelBeforeToday(travelDate) {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const tr = this.parseDateOnly(travelDate);
+                return tr ? tr < today : false;
+            },
+            isTravelOnOrAfterToday(travelDate) {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const tr = this.parseDateOnly(travelDate);
+                return tr ? tr >= today : false;
+            },
+            salesAmount(b) { return Number(b?.salesAmount ?? b?.amount ?? 0); },
+            issuedAmount(b) { return Number(b?.amount ?? 0); },
+            profitAmount(b) { return this.salesAmount(b) - this.issuedAmount(b); },
+            monthHeaderRow(colspan, label) { return MonthGroups.headerRow(colspan, null, label, 'generic', null); },
+            currentMonthKey() { return this.monthKey(new Date()); },
+            formatPaymentDisplay(b) {
+                if (!b) return '—';
+                if (b.paymentStatus === 'Partially Paid' && Array.isArray(b.partialPayments) && b.partialPayments.length)
+                    return b.partialPayments.map(p => `${this.formatCurrency(p.amount)} (${p.mode})`).join('; ');
+                if (b.partialAmount != null && b.paymentMode) return `${this.formatCurrency(b.partialAmount)} (${b.paymentMode})`;
+                if (b.paymentStatus === 'Paid') return b.paymentMode || '—';
+                return b.paymentMode || '—';
+            },
+            bookingMonthKey(b) { return this.monthKey(b.issuedDate || b.closingDate || b.travelDate); },
+            getStatusBadgeClass(s) {
+                const m = { 'Successful': 'badge-success', 'Under Process': 'badge-warning', 'Unsuccessful': 'badge-destructive', 'Pending': 'badge-warning', 'Paid': 'badge-success', 'Partially Paid': 'badge-warning', 'Fail': 'badge-destructive' };
+                return m[s] || 'badge-secondary';
+            }
+        };
+
+        const MonthGroups = {
+            expanded: {},
+            ensure(section) {
+                if (!this.expanded[section]) this.expanded[section] = new Set([Utils.currentMonthKey()]);
+                return this.expanded[section];
+            },
+            isExpanded(section, monthKey) { return this.ensure(section).has(monthKey); },
+            toggle(section, monthKey) {
+                const set = this.ensure(section);
+                if (set.has(monthKey)) set.delete(monthKey); else set.add(monthKey);
+                this.apply(section);
+            },
+            apply(section) {
+                document.querySelectorAll(`tr.month-data-row[data-section="${section}"]`).forEach(tr => {
+                    tr.classList.toggle('month-hidden', !this.isExpanded(section, tr.dataset.monthGroup));
+                });
+                document.querySelectorAll(`tr.month-row-toggle[data-section="${section}"]`).forEach(tr => {
+                    const icon = tr.querySelector('.month-toggle-icon');
+                    if (icon) icon.textContent = this.isExpanded(section, tr.dataset.monthGroup) ? '▼' : '▶';
+                });
+            },
+            hiddenClass(section, monthKey) { return this.isExpanded(section, monthKey) ? '' : ' month-hidden'; },
+            syncVisible(section, monthKeys) {
+                if (!monthKeys.length) { this.apply(section); return; }
+                const set = this.ensure(section);
+                if (!monthKeys.some(k => set.has(k))) {
+                    set.clear();
+                    const cur = Utils.currentMonthKey();
+                    set.add(monthKeys.includes(cur) ? cur : monthKeys[0]);
+                }
+                this.apply(section);
+            },
+            reset(section) { delete this.expanded[section]; },
+            headerRow(colspan, monthKey, label, section, profitText) {
+                const exp = monthKey ? this.isExpanded(section, monthKey) : true;
+                const profit = profitText ? `<span class="month-profit-badge">${profitText}</span>` : '';
+                const mk = monthKey || '';
+                const click = monthKey ? `onclick="MonthGroups.toggle('${section}','${monthKey}')"` : '';
+                return `<tr class="month-row month-row-toggle" data-month-group="${mk}" data-section="${section}" ${click}>
+            <td colspan="${colspan}" class="month-header-cell"><span class="month-toggle-icon">${monthKey ? (exp ? '▼' : '▶') : ''}</span><span>${label}</span>${profit}</td></tr>`;
+            }
+        };
+
+        const ExportUtil = {
+            downloadExcel(sheetName, headers, rows, monthGroups) {
+                const wb = XLSX.utils.book_new();
+                const aoa = [];
+                if (monthGroups) {
+                    monthGroups.forEach(g => {
+                        aoa.push([g.profitLabel ? `${g.label}  |  ${g.profitLabel}` : g.label]);
+                        if (g.profitLabel) aoa.push(['Total Profit', g.profitValue ?? '']);
+                        aoa.push(headers);
+                        g.rows.forEach(r => aoa.push(r));
+                        aoa.push([]);
+                    });
+                } else {
+                    aoa.push(headers);
+                    rows.forEach(r => aoa.push(r));
+                }
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+                XLSX.writeFile(wb, `${sheetName.replace(/\s+/g, '_')}.xlsx`);
+            },
+            downloadPdf(title, headers, rows, monthGroups) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: headers.length > 6 ? 'landscape' : 'portrait' });
+                doc.setFontSize(14);
+                doc.text(title, 14, 16);
+                let startY = 22;
+                const addTable = (head, body) => {
+                    doc.autoTable({ head: [head], body, startY, theme: 'grid', styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [32, 150, 210] } });
+                    startY = doc.lastAutoTable.finalY + 8;
+                };
+                if (monthGroups) {
+                    monthGroups.forEach(g => {
+                        if (startY > 250) { doc.addPage(); startY = 16; }
+                        doc.setFillColor(32, 150, 210);
+                        doc.rect(14, startY - 5, doc.internal.pageSize.getWidth() - 28, 8, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(11);
+                        doc.text(g.label, 16, startY);
+                        if (g.profitLabel) {
+                            doc.setFillColor(198, 239, 206);
+                            const pw = doc.getTextWidth(g.profitLabel) + 8;
+                            doc.rect(doc.internal.pageSize.getWidth() - 14 - pw, startY - 5, pw, 7, 'F');
+                            doc.setTextColor(27, 94, 32);
+                            doc.text(g.profitLabel, doc.internal.pageSize.getWidth() - 14 - pw + 4, startY);
+                            doc.setTextColor(0, 0, 0);
+                        }
+                        startY += 10;
+                        addTable(headers, g.rows);
+                    });
+                } else addTable(headers, rows);
+                doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+            }
+        };
+
+        const Preview = {
+            panelHtml(title, inner) {
+                return `<div class="preview-panel" id="inlinePreview">
+            <div class="preview-title"><span>${title}</span><button type="button" class="preview-close" onclick="Preview.close()" aria-label="Close">&times;</button></div>
+            ${inner}
+        </div>`;
+            },
+            close() {
+                document.querySelectorAll('#inlinePreview').forEach(el => el.remove());
+                document.querySelectorAll('.page-split').forEach(el => el.classList.remove('preview-open'));
+                document.querySelectorAll('.tr-selected').forEach(el => el.classList.remove('tr-selected'));
+            },
+            mount(containerId, html) {
+                const wrap = document.getElementById(containerId);
+                if (!wrap) return;
+                wrap.classList.add('preview-open');
+                const old = wrap.querySelector('#inlinePreview');
+                if (old) old.remove();
+                wrap.insertAdjacentHTML('beforeend', html);
+            },
+            booking(b) {
+                const inq = Storage.getInquiries().find(i => i.id === b.inquiryId);
+                const inner = `<div class="info-grid">
+            <div><strong>Invoice</strong><br>${Utils.escapeHtml(b.invoiceNumber)}</div>
+            <div><strong>Client</strong><br>${Utils.escapeHtml(b.clientName)}</div>
+            <div><strong>Phone</strong><br>${Utils.escapeHtml(b.contactNumber)}</div>
+            <div><strong>Email</strong><br>${Utils.escapeHtml(b.email || '—')}</div>
+            <div><strong>From</strong><br>${Utils.escapeHtml(b.fromLocation || inq?.fromLocation || '—')}</div>
+            <div><strong>Destination</strong><br>${Utils.escapeHtml(b.destination)}</div>
+            <div><strong>Issued date</strong><br>${Utils.formatDate(b.issuedDate || b.closingDate)}</div>
+            <div><strong>Travel date</strong><br>${Utils.formatDate(b.travelDate)}</div>
+            <div><strong>Type</strong><br>${Utils.escapeHtml(b.inquiryFor || inq?.inquiryFor || '—')}</div>
+            <div><strong>Airline PNR</strong><br><span class="font-mono">${Utils.escapeHtml(b.airlinePNR || '—')}</span></div>
+            <div><strong>GDS PNR</strong><br><span class="font-mono">${Utils.escapeHtml(b.gdsPNR || '—')}</span></div>
+            <div><strong>Issued amount</strong><br>${Utils.formatCurrency(Utils.issuedAmount(b))}</div>
+            <div><strong>Sales amount</strong><br>${Utils.formatCurrency(Utils.salesAmount(b))}</div>
+            <div><strong>Payment</strong><br><span class="badge ${Utils.getStatusBadgeClass(b.paymentStatus)}">${Utils.escapeHtml(b.paymentStatus || '—')}</span></div>
+            <div><strong>Mode</strong><br>${Utils.escapeHtml(Utils.formatPaymentDisplay(b))}</div>
+            <div style="grid-column:1/-1"><strong>Remarks</strong><br>${Utils.escapeHtml(b.remarks || '—')}</div>
+            <div style="grid-column:1/-1"><strong>Details</strong><br>${Utils.escapeHtml(b.bookingDetails || '—')}</div>
+        </div>`;
+                return this.panelHtml('Booking preview', inner);
+            },
+            inquiry(i) {
+                const bk = Storage.getBookings().find(b => b.inquiryId === i.id);
+                let extra = bk ? `<p class="mt-4" style="font-size:13px;color:var(--muted-foreground)">Linked booking: ${Utils.escapeHtml(bk.invoiceNumber)}</p>` : '';
+                const inner = `<div class="info-grid">
+            <div><strong>ID</strong><br><span class="font-mono">${Utils.escapeHtml(i.id)}</span></div>
+            <div><strong>Status</strong><br><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${Utils.escapeHtml(i.status)}</span></div>
+            <div><strong>Client</strong><br>${Utils.escapeHtml(i.clientName)}</div>
+            <div><strong>Phone</strong><br>${Utils.escapeHtml(i.contactNumber)}</div>
+            <div><strong>Email</strong><br>${Utils.escapeHtml(i.email || '—')}</div>
+            <div><strong>Type</strong><br>${Utils.escapeHtml(i.inquiryFor)}</div>
+            <div><strong>From</strong><br>${Utils.escapeHtml(i.fromLocation || '—')}</div>
+            <div><strong>Destination</strong><br>${Utils.escapeHtml(i.destination)}</div>
+            <div><strong>Travel date</strong><br>${Utils.formatDate(i.travelDate)}</div>
+            <div><strong>Inquiry date</strong><br>${Utils.formatDate(i.inquiryDate)}</div>
+            <div style="grid-column:1/-1"><strong>Description</strong><br>${Utils.escapeHtml(i.description || '—')}</div>
+        </div>${extra}`;
+                return this.panelHtml('Inquiry preview', inner);
+            }
+        };
+
+        /* ---------- Modal ---------- */
+        const Modal = {
+            show(title, content, desc = '') {
+                const o = document.createElement('div');
+                o.className = 'modal-overlay';
+                o.innerHTML = `
             <div class="modal">
                 <div class="modal-header">
                     <div class="modal-title">${title}</div>
-                    ${desc?`<div class="modal-description">${desc}</div>`:''}
+                    ${desc ? `<div class="modal-description">${desc}</div>` : ''}
                 </div>
                 <div class="modal-content">${content}</div>
             </div>`;
-        document.body.appendChild(o);
-        o.addEventListener('click',e=>{if(e.target===o) o.remove();});
-        return o;
-    }
-};
+                document.body.appendChild(o);
+                o.addEventListener('click', e => { if (e.target === o) o.remove(); });
+                return o;
+            }
+        };
 
-/* ---------- Layout ---------- */
-const Layout = {
-    render(pageTitle,content){
-        const u=Auth.getUser();
-        return `
+        /* ---------- Layout ---------- */
+        const Layout = {
+            render(pageTitle, content) {
+                const u = Auth.getUser();
+                return `
             <div class="app-container">
                 <aside class="sidebar" id="sidebar">
                     <div class="sidebar-header">
@@ -409,7 +2027,9 @@ const Layout = {
                         <button class="nav-item" data-page="dashboard">Dashboard</button>
                         <button class="nav-item" data-page="my-bookings">My Bookings</button>
                         <button class="nav-item" data-page="inquiries">Inquiries</button>
+                        <button class="nav-item" data-page="details">Details</button>
                         <button class="nav-item" data-page="reports">Reports</button>
+                        <button class="nav-item" data-page="settings">⚙ Settings</button>
                     </nav>
                     <div class="sidebar-footer">
                         <div class="user-info"><p>${u.name}</p><small>${u.email}</small><div class="user-role">${u.role}</div></div>
@@ -424,50 +2044,50 @@ const Layout = {
                     <main class="content">${content}</main>
                 </div>
             </div>`;
-    },
-    updateActiveNav(p){
-        document.querySelectorAll('.nav-item').forEach(i=>{i.classList.remove('active'); if(i.dataset.page===p) i.classList.add('active');});
-    }
-};
-function toggleSidebar(){
-    const s=document.getElementById('sidebar');
-    const open=s.classList.toggle('open');
-    if(open){
-        const o=document.createElement('div');
-        o.className='sidebar-overlay open';
-        o.onclick=toggleSidebar;
-        document.body.appendChild(o);
-    }else{
-        const o=document.querySelector('.sidebar-overlay');
-        if(o) o.remove();
-    }
-}
-function handleLogout(){ Auth.logout(); Router.navigate('login'); }
+            },
+            updateActiveNav(p) {
+                document.querySelectorAll('.nav-item').forEach(i => { i.classList.remove('active'); if (i.dataset.page === p) i.classList.add('active'); });
+            }
+        };
+        function toggleSidebar() {
+            const s = document.getElementById('sidebar');
+            const open = s.classList.toggle('open');
+            if (open) {
+                const o = document.createElement('div');
+                o.className = 'sidebar-overlay open';
+                o.onclick = toggleSidebar;
+                document.body.appendChild(o);
+            } else {
+                const o = document.querySelector('.sidebar-overlay');
+                if (o) o.remove();
+            }
+        }
+        async function handleLogout() { await Auth.logout(); Router.navigate('login'); }
 
-/* ---------- Animation Helper ---------- */
-function animateElements() {
-    document.querySelectorAll('.card').forEach((el, i) => {
-        setTimeout(() => el.classList.add('animate'), i * 100);
-    });
-    document.querySelectorAll('.table tr').forEach((el, i) => {
-        setTimeout(() => el.classList.add('animate'), i * 50 + 300);
-    });
-    document.querySelectorAll('.chart-container').forEach((el, i) => {
-        setTimeout(() => el.classList.add('animate'), i * 200 + 500);
-    });
-}
+        /* ---------- Animation Helper ---------- */
+        function animateElements() {
+            document.querySelectorAll('.card').forEach((el, i) => {
+                setTimeout(() => el.classList.add('animate'), i * 100);
+            });
+            document.querySelectorAll('.table tbody tr.data-animate').forEach((el, i) => {
+                setTimeout(() => el.classList.add('animate'), i * 50 + 300);
+            });
+            document.querySelectorAll('.chart-container').forEach((el, i) => {
+                setTimeout(() => el.classList.add('animate'), i * 200 + 500);
+            });
+        }
 
-/* ---------- Dashboard ---------- */
-const Dashboard = {
-    render(){
-        const u=Auth.getUser();
-        const inqs=Storage.getInquiries().filter(i=>u.role==='admin'||i.employeeId===u.id);
-        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
-        const succ=inqs.filter(i=>i.status==='Successful').length;
-        const proc=inqs.filter(i=>i.status==='Under Process').length;
-        const upcoming=bks.filter(b=>new Date(b.travelDate)>new Date()).length;
+        /* ---------- Dashboard ---------- */
+        const Dashboard = {
+            render() {
+                const u = Auth.getUser();
+                const inqs = Storage.getInquiries().filter(i => u.role === 'admin' || i.employeeId === u.id);
+                const bks = Storage.getBookings().filter(b => u.role === 'admin' || b.employeeId === u.id);
+                const succ = inqs.filter(i => i.status === 'Successful').length;
+                const proc = inqs.filter(i => i.status === 'Under Process').length;
+                const upcoming = bks.filter(b => new Date(b.travelDate) > new Date()).length;
 
-        const content=`
+                const content = `
             <div class="space-y-6">
                 <div class="grid grid-cols-4 gap-4">
                     <div class="card metric-card"><div class="metric-card-header"><div class="metric-card-title">Total Bookings</div></div><div class="metric-value" style="color:var(--primary)">${bks.length}</div><div class="metric-label">This month</div></div>
@@ -478,7 +2098,7 @@ const Dashboard = {
 
                 <div class="card"><div class="card-header"><div class="card-title">Quick Actions</div></div>
                     <div class="card-content"><div class="actions-flex">
-                        ${u.role==='admin'?`<button class="btn btn-primary" onclick="Dashboard.showAddEmployee()">Add Employee</button>`:''}
+                        ${u.role === 'admin' ? `<button class="btn btn-primary" onclick="Dashboard.showAddEmployee()">Add Employee</button>` : ''}
                         <button class="btn btn-primary" onclick="Router.navigate('inquiries')">New Inquiry</button>
                     </div></div>
                 </div>
@@ -488,153 +2108,421 @@ const Dashboard = {
                 </div>
 
                 <div class="card"><div class="card-header"><div class="card-title">Recent Inquiries</div></div>
-                    <div class="card-content"><div class="table-container"><table class="table">
+                    <div class="card-content"><div class="page-split" id="dashPreviewWrap">
+                    <div><div class="table-container"><table class="table">
                         <thead><tr><th>ID</th><th>Client</th><th>Dest</th><th>Date</th><th>Status</th><th>View</th></tr></thead>
-                        <tbody>${inqs.slice(0,5).map(i=>`
+                        <tbody>${inqs.slice(0, 5).map(i => `
                             <tr><td class="font-mono">${i.id}</td><td>${i.clientName}</td><td>${i.destination}</td><td>${Utils.formatDate(i.travelDate)}</td>
                             <td><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${i.status}</span></td>
-                            <td><button class="btn btn-ghost btn-sm" onclick="Router.navigate('inquiries')">View</button></td></tr>`).join('')}
+                            <td><button class="btn btn-ghost btn-sm" onclick="Dashboard.viewInquiry('${i.id}')">View</button></td></tr>`).join('')}
                         </tbody></table></div></div>
+                    </div></div></div>
                 </div>
             </div>`;
-        return Layout.render('Dashboard', content);
-    },
+                return Layout.render('Dashboard', content);
+            },
 
-    searchPNR(){
-        const p=document.getElementById('pnrSearch').value.trim().toLowerCase();
-        const r=document.getElementById('pnrResult');
-        if(!p){ r.innerHTML=''; return; }
-        const u=Auth.getUser();
-        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
-        const f=bks.find(b=>b.airlinePNR.toLowerCase()===p||b.gdsPNR.toLowerCase()===p);
-        if(f){
-            r.innerHTML=`<div class="info-box"><h4 style="font-weight:600;margin-bottom:12px">Booking Found</h4>
+            searchPNR() {
+                const p = document.getElementById('pnrSearch').value.trim().toLowerCase();
+                const r = document.getElementById('pnrResult');
+                if (!p) { r.innerHTML = ''; return; }
+                const u = Auth.getUser();
+                const bks = Storage.getBookings().filter(b => u.role === 'admin' || b.employeeId === u.id);
+                const f = bks.find(b => b.airlinePNR.toLowerCase() === p || b.gdsPNR.toLowerCase() === p);
+                if (f) {
+                    r.innerHTML = `<div class="info-box"><h4 style="font-weight:600;margin-bottom:12px">Booking Found</h4>
                 <div class="info-grid"><div>Client: ${f.clientName}</div><div>Invoice: ${f.invoiceNumber}</div>
                 <div>Dest: ${f.destination}</div><div>Date: ${Utils.formatDate(f.travelDate)}</div>
-                <div>Payment: ${f.paymentStatus}</div><div>Amount: ${Utils.formatCurrency(f.amount,f.currency)}</div></div></div>`;
-        }else{
-            r.innerHTML=`<div class="text-center text-var(--destructive)">No booking found</div>`;
-        }
-    },
+                <div>Payment: ${f.paymentStatus}</div><div>Sales: ${Utils.formatCurrency(Utils.salesAmount(f))}</div></div></div>`;
+                } else {
+                    r.innerHTML = `<div class="text-center text-var(--destructive)">No booking found</div>`;
+                }
+            },
 
-    showAddEmployee(){
-        const html=`<form id="addEmployeeForm">
+            viewInquiry(id) {
+                const inq = Storage.getInquiries().find(i => i.id === id);
+                if (!inq) return;
+                Preview.mount('dashPreviewWrap', Preview.inquiry(inq));
+            },
+
+            showAddEmployee() {
+                const html = `<form id="addEmployeeForm">
             <div class="form-group"><label class="form-label">Name</label><input type="text" id="empName" class="form-input" required></div>
             <div class="form-group"><label class="form-label">Email</label><input type="email" id="empEmail" class="form-input" required></div>
             <button type="submit" class="btn btn-primary w-full">Add Employee</button></form>`;
-        const m=Modal.show('Add Employee',html);
-        document.getElementById('addEmployeeForm').onsubmit=e=>{
-            e.preventDefault();
-            const emp={id:Date.now().toString(),name:document.getElementById('empName').value,email:document.getElementById('empEmail').value,role:'employee'};
-            Storage.saveEmployee(emp);
-            Utils.showToast('Success','Employee added');
-            m.remove();
+                const m = Modal.show('Add Employee', html);
+                document.getElementById('addEmployeeForm').onsubmit = e => {
+                    e.preventDefault();
+                    const emp = { id: Date.now().toString(), name: document.getElementById('empName').value, email: document.getElementById('empEmail').value, role: 'employee' };
+                    Storage.saveEmployee(emp);
+                    Utils.showToast('Success', 'Employee added');
+                    m.remove();
+                };
+            }
         };
-    }
-};
 
-/* ---------- My Bookings ---------- */
-const MyBookings = {
-    render(){
-        const u=Auth.getUser();
-        const bks=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
-        const content=`
+        /* ---------- My Bookings ---------- */
+        const MyBookings = {
+            SECTION: 'bookings',
+            HEADERS: ['Sr. No.', 'Invoice', 'Client', 'Phone', 'Email', 'From', 'Destination', 'Travel date', 'Type', 'Airline PNR', 'GDS PNR', 'Issued amount', 'Sales amount', 'Payment', 'Mode', 'Details'],
+            render() {
+                const u = Auth.getUser();
+                const bks = Storage.getBookings().filter(b => u.role === 'admin' || b.employeeId === u.id);
+                this.lastList = bks;
+                const content = `
             <div class="space-y-6"><div class="card"><div class="card-header"><div class="card-title">My Bookings</div></div>
                 <div class="card-content">
-                    <div class="mb-4"><div class="search-box"><span class="search-icon">Search</span><input type="text" id="bookingSearch" class="form-input" placeholder="Search..." oninput="MyBookings.filter()"></div></div>
-                    <div class="table-container"><table class="table"><thead><tr><th>Inv #</th><th>Client</th><th>Dest</th><th>Date</th><th>PNR</th><th>Amount</th><th>Pay</th></tr></thead>
-                        <tbody id="bookingsBody">${this.rows(bks)}</tbody></table></div>
-                    <div class="summary-box"><p>Total: <span id="totalCount">${bks.length}</span> | Revenue: <span id="totalRev">${Utils.formatCurrency(bks.reduce((s,b)=>s+b.amount,0))}</span></p></div>
+                    <div class="page-split" id="bookingsPreviewWrap">
+                    <div>
+                    <div class="mb-4"><div class="search-box"><span class="search-icon">Search</span><input type="text" id="bookingSearch" class="form-input" placeholder="" oninput="MyBookings.filter()"></div></div>
+                    <div class="export-bar">
+                        <button class="btn btn-outline btn-sm" onclick="MyBookings.exportPdf()">Download PDF</button>
+                        <button class="btn btn-outline btn-sm" onclick="MyBookings.exportExcel()">Download Excel</button>
+                    </div>
+                    <div id="bookingsTableArea">${this.tableHtml(bks)}</div>
+                    <div class="summary-box"><p>Total: <span id="totalCount">${bks.length}</span> | Revenue (Sales): <span id="totalRev">${Utils.formatCurrency(bks.reduce((s, b) => s + Utils.salesAmount(b), 0))}</span></p></div>
+                    </div></div>
                 </div></div></div>`;
-        return Layout.render('My Bookings', content);
-    },
-    rows(bks){ return bks.map(b=>`<tr><td class="font-mono">${b.invoiceNumber}</td><td>${b.clientName}</td><td>${b.destination}</td><td>${Utils.formatDate(b.travelDate)}</td>
-        <td class="font-mono">${b.airlinePNR}</td><td>${Utils.formatCurrency(b.amount,b.currency)}</td>
-        <td><span class="badge ${Utils.getStatusBadgeClass(b.paymentStatus)}">${b.paymentStatus}</span></td></tr>`).join('') || '<tr><td colspan="7" class="text-center">No bookings</td></tr>'; },
-    filter(){
-        const term=document.getElementById('bookingSearch').value.toLowerCase();
-        const u=Auth.getUser();
-        const all=Storage.getBookings().filter(b=>u.role==='admin'||b.employeeId===u.id);
-        const filtered=all.filter(b=>JSON.stringify(b).toLowerCase().includes(term));
-        document.getElementById('bookingsBody').innerHTML=this.rows(filtered);
-        document.getElementById('totalCount').textContent=filtered.length;
-        document.getElementById('totalRev').textContent=Utils.formatCurrency(filtered.reduce((s,b)=>s+b.amount,0));
-    }
-};
-/* ---------- Inquiries (FULLY FIXED - EDIT WORKS) ---------- */
-const Inquiries = {
-    render(){
-        const u=Auth.getUser();
-        const all=Storage.getInquiries();
-        const list = u.role==='admin'?all:all.filter(i=>i.employeeId===u.id);
-        const content=`
+                return Layout.render('My Bookings', content);
+            },
+            groupByMonth(bks) {
+                const map = new Map();
+                bks.forEach(b => {
+                    const k = Utils.bookingMonthKey(b);
+                    if (!map.has(k)) map.set(k, []);
+                    map.get(k).push(b);
+                });
+                return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+            },
+            monthProfit(items) { return items.reduce((s, b) => s + Utils.profitAmount(b), 0); },
+            exportRow(b, sr) {
+                return [sr, b.invoiceNumber, b.clientName, b.contactNumber || '', b.email || '', b.fromLocation || '', b.destination, Utils.formatDate(b.travelDate), b.inquiryFor || '', b.airlinePNR || '', b.gdsPNR || '', Utils.issuedAmount(b), Utils.salesAmount(b), b.paymentStatus || '', Utils.formatPaymentDisplay(b), b.bookingDetails || ''];
+            },
+            tableHtml(bks) {
+                if (!bks.length) return '<p class="text-center" style="padding:24px;color:var(--muted-foreground)">No bookings</p>';
+                const cols = this.HEADERS.length + 1;
+                const sec = this.SECTION;
+                let html = `<div class="table-container"><table class="table table-bordered"><thead><tr>${this.HEADERS.map(h => `<th>${h}</th>`).join('')}<th></th></tr></thead><tbody>`;
+                this.groupByMonth(bks).forEach(([key, items]) => {
+                    const profit = this.monthProfit(items);
+                    const profitLabel = `Total Profit: ${Utils.formatCurrency(profit)}`;
+                    html += MonthGroups.headerRow(cols, key, Utils.monthLabel(key), sec, profitLabel);
+                    html += this.dataRows(items, key, sec);
+                });
+                html += '</tbody></table></div>';
+                this.lastList = bks;
+                return html;
+            },
+            dataRows(bks, monthKey, section) {
+                let sr = 0;
+                return bks.map(b => {
+                    sr++;
+                    const hc = MonthGroups.hiddenClass(section, monthKey);
+                    return `<tr class="month-data-row data-animate tr-clickable${hc}" data-month-group="${monthKey}" data-section="${section}" data-booking-id="${b.id}" onclick="MyBookings.openPreview('${b.id}', this)">
+        <td>${sr}</td><td class="font-mono">${Utils.escapeHtml(b.invoiceNumber)}</td><td>${Utils.escapeHtml(b.clientName)}</td><td>${Utils.escapeHtml(b.contactNumber || '—')}</td><td>${Utils.escapeHtml(b.email || '—')}</td>
+        <td>${Utils.escapeHtml(b.fromLocation || '—')}</td><td>${Utils.escapeHtml(b.destination)}</td><td>${Utils.formatDate(b.travelDate)}</td><td>${Utils.escapeHtml(b.inquiryFor || '—')}</td>
+        <td class="font-mono">${Utils.escapeHtml(b.airlinePNR || '—')}</td><td class="font-mono">${Utils.escapeHtml(b.gdsPNR || '—')}</td>
+        <td>${Utils.formatCurrency(Utils.issuedAmount(b))}</td><td>${Utils.formatCurrency(Utils.salesAmount(b))}</td>
+        <td><span class="badge ${Utils.getStatusBadgeClass(b.paymentStatus)}">${Utils.escapeHtml(b.paymentStatus || '—')}</span></td>
+        <td>${Utils.escapeHtml(Utils.formatPaymentDisplay(b))}</td><td>${Utils.escapeHtml(b.bookingDetails || '—')}</td>
+        <td onclick="event.stopPropagation()"><div class="row-actions">
+            <button class="btn btn-ghost btn-sm icon-btn" title="Edit" onclick="MyBookings.edit('${b.id}')">✎</button>
+            <button class="btn btn-ghost btn-sm icon-btn" title="Delete" style="color:var(--destructive)" onclick="MyBookings.del('${b.id}')">🗑</button>
+        </div></td></tr>`;
+                }).join('');
+            },
+            exportGroups(list) {
+                return this.groupByMonth(list).map(([k, items]) => {
+                    const profit = this.monthProfit(items);
+                    const profitLabel = `Total Profit: ${Utils.formatCurrency(profit)}`;
+                    let sr = 0;
+                    return { label: Utils.monthLabel(k), profitLabel, profitValue: profit, rows: items.map(b => this.exportRow(b, ++sr)) };
+                });
+            },
+            exportPdf() {
+                ExportUtil.downloadPdf('Bookings', this.HEADERS, [], this.exportGroups(this.lastList || []));
+            },
+            exportExcel() {
+                ExportUtil.downloadExcel('Bookings', this.HEADERS, [], this.exportGroups(this.lastList || []));
+            },
+            afterRender() {
+                const keys = this.groupByMonth(this.lastList || []).map(([k]) => k);
+                MonthGroups.syncVisible(this.SECTION, keys);
+            },
+            openPreview(id, rowEl) {
+                const b = Storage.getBookings().find(x => x.id === id);
+                if (!b) return;
+                document.querySelectorAll('#bookingsTableArea .tr-selected').forEach(r => r.classList.remove('tr-selected'));
+                if (rowEl) rowEl.classList.add('tr-selected');
+                Preview.mount('bookingsPreviewWrap', Preview.booking(b));
+            },
+            edit(id) {
+                const b = Storage.getBookings().find(x => x.id === id);
+                if (!b) return;
+                const html = `<form id="editBkForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group"><label class="form-label">Invoice #</label><input type="text" id="ebInv" class="form-input" value="${Utils.escapeHtml(b.invoiceNumber)}" required></div>
+                <div class="form-group"><label class="form-label">Travel date</label><input type="date" id="ebDate" class="form-input" value="${b.travelDate}"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group"><label class="form-label">Airline PNR</label><input type="text" id="ebAPnr" class="form-input" value="${Utils.escapeHtml(b.airlinePNR || '')}"></div>
+                <div class="form-group"><label class="form-label">GDS PNR</label><input type="text" id="ebGPnr" class="form-input" value="${Utils.escapeHtml(b.gdsPNR || '')}"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Details</label><textarea id="ebDet" class="form-textarea">${Utils.escapeHtml(b.bookingDetails || '')}</textarea></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group"><label class="form-label">Issued amount</label><input type="number" id="ebAmt" class="form-input" value="${b.amount}" required></div>
+                <div class="form-group"><label class="form-label">Sales amount</label><input type="number" id="ebSales" class="form-input" value="${b.salesAmount ?? b.amount}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Save</button>
+        </form>`;
+                const m = Modal.show('Edit booking', html);
+                document.getElementById('editBkForm').onsubmit = e => {
+                    e.preventDefault();
+                    b.invoiceNumber = document.getElementById('ebInv').value;
+                    b.travelDate = document.getElementById('ebDate').value;
+                    b.airlinePNR = document.getElementById('ebAPnr').value;
+                    b.gdsPNR = document.getElementById('ebGPnr').value;
+                    b.bookingDetails = document.getElementById('ebDet').value;
+                    b.amount = parseFloat(document.getElementById('ebAmt').value);
+                    b.salesAmount = parseFloat(document.getElementById('ebSales').value);
+                    Storage.saveBooking(b);
+                    Utils.showToast('Saved', 'Booking updated');
+                    m.remove();
+                    Router.navigate('my-bookings');
+                };
+            },
+            del(id) {
+                if (!confirm('Delete this booking?')) return;
+                Storage.deleteBooking(id);
+                Utils.showToast('Deleted', 'Booking removed');
+                Router.navigate('my-bookings');
+            },
+            filter() {
+                const term = document.getElementById('bookingSearch').value.toLowerCase();
+                const u = Auth.getUser();
+                const all = Storage.getBookings().filter(b => u.role === 'admin' || b.employeeId === u.id);
+                const filtered = all.filter(b => JSON.stringify(b).toLowerCase().includes(term));
+                const area = document.getElementById('bookingsTableArea');
+                if (area) area.innerHTML = this.tableHtml(filtered);
+                document.getElementById('totalCount').textContent = filtered.length;
+                document.getElementById('totalRev').textContent = Utils.formatCurrency(filtered.reduce((s, b) => s + Utils.salesAmount(b), 0));
+                Preview.close();
+                this.afterRender();
+            }
+        };
+        /* ---------- Inquiries ---------- */
+        const Inquiries = {
+            SECTION: 'inquiries',
+            previewId: null,
+            defaultRange() {
+                const now = new Date();
+                const start = Utils.startOfMonth(now);
+                const end = Utils.endOfMonth(now);
+                return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
+            },
+            render() {
+                const u = Auth.getUser();
+                const all = Storage.getInquiries();
+                this.baseList = u.role === 'admin' ? all : all.filter(i => i.employeeId === u.id);
+                const range = this.defaultRange();
+                const content = `
             <div class="space-y-6"><div class="card"><div class="card-header card-header-flex">
-                <div><div class="card-title">Inquiries</div></div>
+                <div><div class="card-title">Inquiries</div><div class="card-description">Filter, search, and manage inquiries</div></div>
                 <button class="btn btn-primary" onclick="Inquiries.add()">New</button>
-            </div><div class="card-content"><div class="table-container"><table class="table">
-                <thead><tr><th>ID</th><th>Client</th><th>Dest</th><th>Date</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody>${this.rows(list)}</tbody></table></div></div></div></div>`;
-        return Layout.render('Inquiries', content);
-    },
-    rows(list){
-        return list.map(i=>`<tr>
-            <td class="font-mono">${i.id}</td><td>${i.clientName}</td><td>${i.destination}</td><td>${Utils.formatDate(i.travelDate)}</td>
-            <td>${i.inquiryFor}</td><td><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${i.status}</span></td>
-            <td class="flex gap-1">
+            </div><div class="card-content">
+                <div class="filters-bar">
+                    <div class="form-group"><label class="form-label">From date</label><input type="date" id="inqDateFrom" class="form-input" value="${range.start}" onchange="Inquiries.applyFilters()"></div>
+                    <div class="form-group"><label class="form-label">To date</label><input type="date" id="inqDateTo" class="form-input" value="${range.end}" onchange="Inquiries.applyFilters()"></div>
+                    <div class="form-group"><label class="form-label">Status</label>
+                        <select id="inqStatusFilter" class="form-select" onchange="Inquiries.applyFilters()">
+                            <option value="all">All</option>
+                            <option value="process">Process</option>
+                            <option value="success">Success</option>
+                            <option value="fail">Fail</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:2"><label class="form-label">Search</label>
+                        <div class="search-box"><span class="search-icon">⌕</span><input type="text" id="inqSearch" class="form-input" placeholder="ID, client, from, dest, date, type, status…" oninput="Inquiries.applyFilters()"></div>
+                    </div>
+                </div>
+                <div class="export-bar">
+                    <button class="btn btn-outline btn-sm" onclick="Inquiries.exportPdf()">Download PDF</button>
+                    <button class="btn btn-outline btn-sm" onclick="Inquiries.exportExcel()">Download Excel</button>
+                </div>
+                <div class="page-split" id="inqPreviewWrap">
+                <div id="inqTableArea">${this.tableHtml(this.initialList())}</div>
+                </div>
+            </div></div></div>`;
+                return Layout.render('Inquiries', content);
+            },
+            initialList() {
+                const range = this.defaultRange();
+                const from = new Date(range.start);
+                const to = new Date(range.end + 'T23:59:59');
+                return this.baseList.filter(i => {
+                    const d = new Date(i.inquiryDate || i.travelDate);
+                    return d >= from && d <= to;
+                }).sort((a, b) => new Date(b.inquiryDate) - new Date(a.inquiryDate));
+            },
+            statusMatch(i, filter) {
+                if (filter === 'all') return true;
+                if (filter === 'process') return i.status === 'Under Process';
+                if (filter === 'success') return i.status === 'Successful';
+                if (filter === 'fail') return i.status === 'Unsuccessful';
+                return true;
+            },
+            getFiltered() {
+                const fromEl = document.getElementById('inqDateFrom');
+                const toEl = document.getElementById('inqDateTo');
+                const from = fromEl ? new Date(fromEl.value) : Utils.startOfMonth(new Date());
+                const to = toEl ? new Date(toEl.value + 'T23:59:59') : Utils.endOfMonth(new Date());
+                const status = document.getElementById('inqStatusFilter')?.value || 'all';
+                const q = (document.getElementById('inqSearch')?.value || '').toLowerCase().trim();
+                return this.baseList.filter(i => {
+                    const d = new Date(i.inquiryDate || i.travelDate);
+                    if (d < from || d > to) return false;
+                    if (!this.statusMatch(i, status)) return false;
+                    if (!q) return true;
+                    const hay = [i.id, i.clientName, i.fromLocation, i.destination, i.travelDate, i.inquiryFor, i.status, Utils.formatDate(i.travelDate)].join(' ').toLowerCase();
+                    return hay.includes(q);
+                }).sort((a, b) => new Date(b.inquiryDate) - new Date(a.inquiryDate));
+            },
+            groupByMonth(list) {
+                const map = new Map();
+                list.forEach(i => {
+                    const k = Utils.monthKey(i.inquiryDate || i.travelDate);
+                    if (!map.has(k)) map.set(k, []);
+                    map.get(k).push(i);
+                });
+                return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+            },
+            tableHtml(list) {
+                if (!list.length) return '<p class="text-center" style="color:var(--muted-foreground);padding:24px">No inquiries in this range</p>';
+                const groups = this.groupByMonth(list);
+                let html = '<div class="table-container"><table class="table table-bordered"><thead><tr><th>Sr. No.</th><th>ID</th><th>Client</th><th>From</th><th>Dest</th><th>Inquiry Date</th><th>Travel Date</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                const sec = this.SECTION;
+                groups.forEach(([key, items]) => {
+                    html += MonthGroups.headerRow(10, key, Utils.monthLabel(key), sec, null);
+                    html += this.rows(items, key, sec);
+                });
+                html += '</tbody></table></div>';
+                this.filteredList = list;
+                return html;
+            },
+            applyFilters() {
+                const area = document.getElementById('inqTableArea');
+                if (area) area.innerHTML = this.tableHtml(this.getFiltered());
+                const keys = this.groupByMonth(this.getFiltered()).map(([k]) => k);
+                MonthGroups.syncVisible(this.SECTION, keys);
+            },
+            rows(list, monthKey, section) {
+                const hc = monthKey ? MonthGroups.hiddenClass(section, monthKey) : '';
+                let sr = 0;
+                return list.map(i => {
+                    sr++;
+                    return `<tr class="month-data-row data-animate tr-clickable${hc}" data-month-group="${monthKey}" data-section="${section}" onclick="Inquiries.openPreview('${i.id}', this)">
+            <td>${sr}</td><td class="font-mono">${Utils.escapeHtml(i.id)}</td><td>${Utils.escapeHtml(i.clientName)}</td><td>${Utils.escapeHtml(i.fromLocation || '—')}</td><td>${Utils.escapeHtml(i.destination)}</td>
+            <td>${Utils.formatDate(i.inquiryDate)}</td><td>${Utils.formatDate(i.travelDate)}</td>
+            <td>${Utils.escapeHtml(i.inquiryFor)}</td><td><span class="badge ${Utils.getStatusBadgeClass(i.status)}">${Utils.escapeHtml(i.status)}</span></td>
+            <td class="flex gap-1" onclick="event.stopPropagation()">
                 <button class="btn btn-ghost btn-sm" onclick="Inquiries.edit('${i.id}')">Edit</button>
                 <button class="btn btn-ghost btn-sm" onclick="Inquiries.status('${i.id}','Under Process')">Process</button>
                 <button class="btn btn-ghost btn-sm" onclick="Inquiries.status('${i.id}','Successful')">Success</button>
                 <button class="btn btn-ghost btn-sm" onclick="Inquiries.status('${i.id}','Unsuccessful')">Fail</button>
                 <button class="btn btn-ghost btn-sm" style="color:var(--destructive)" onclick="Inquiries.del('${i.id}')">Del</button>
             </td>
-        </tr>`).join('') || '<tr><td colspan="7" class="text-center">No inquiries</td></tr>';
-    },
-    add(){
-        const html=`<form id="addForm" class="space-y-4">
+        </tr>`;
+                }).join('');
+            },
+            openPreview(id, rowEl) {
+                const inq = Storage.getInquiries().find(i => i.id === id);
+                if (!inq) return;
+                this.previewId = id;
+                document.querySelectorAll('#inqTableArea .tr-selected').forEach(r => r.classList.remove('tr-selected'));
+                if (rowEl) rowEl.classList.add('tr-selected');
+                Preview.mount('inqPreviewWrap', Preview.inquiry(inq));
+            },
+            exportRows(list) {
+                let sr = 0;
+                return list.map(i => [++sr, i.id, i.clientName, i.fromLocation || '', i.destination, Utils.formatDate(i.inquiryDate), Utils.formatDate(i.travelDate), i.inquiryFor, i.status]);
+            },
+            exportPdf() {
+                const list = this.getFiltered();
+                const headers = ['Sr. No.', 'ID', 'Client', 'From', 'Dest', 'Inquiry Date', 'Travel Date', 'Type', 'Status'];
+                const groups = this.groupByMonth(list).map(([k, items]) => ({ label: Utils.monthLabel(k), rows: this.exportRows(items) }));
+                ExportUtil.downloadPdf('Inquiries', headers, [], groups);
+            },
+            exportExcel() {
+                const list = this.getFiltered();
+                const headers = ['Sr. No.', 'ID', 'Client', 'From', 'Dest', 'Inquiry Date', 'Travel Date', 'Type', 'Status'];
+                const groups = this.groupByMonth(list).map(([k, items]) => ({ label: Utils.monthLabel(k), rows: this.exportRows(items) }));
+                ExportUtil.downloadExcel('Inquiries', headers, [], groups);
+            },
+            PAY_MODES: ['Cash', 'Card', 'Online-Bank Transfer', 'Others'],
+            add() {
+                const html = `<form id="addForm" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-                <div class="form-group"><label>Name *</label><input type="text" id="cName" class="form-input" required></div>
-                <div class="form-group"><label>Phone *</label><input type="text" id="cPhone" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Name *</label><input type="text" id="cName" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Phone *</label><input type="text" id="cPhone" class="form-input" required></div>
             </div>
-            <div class="form-group"><label>Email</label><input type="email" id="cEmail" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="cEmail" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Type *</label>
+                <select id="cType" class="form-select" required onchange="Inquiries.toggleFromField()">
+                    <option value="">Select type</option>
+                    <option>Tickets</option><option>Hotels</option><option>Tour Package</option><option>Others</option>
+                </select>
+            </div>
+            <div class="form-group hidden" id="fromFieldWrap"><label class="form-label">From</label><input type="text" id="cFrom" class="form-input" placeholder="Origin / departure city"></div>
+            <div class="form-group"><label class="form-label">Dest *</label><input type="text" id="cDest" class="form-input" required></div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="form-group"><label>Type *</label><select id="cType" class="form-select"><option>Tickets</option><option>Tour Package</option><option>Hotel</option><option>Others</option></select></div>
-                <div class="form-group"><label>Dest *</label><input type="text" id="cDest" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Inquiry Date *</label><input type="date" id="cInqDate" class="form-input" value="${new Date().toISOString().slice(0, 10)}" required></div>
+                <div class="form-group"><label class="form-label">Travel Date *</label><input type="date" id="cDate" class="form-input" required></div>
             </div>
-            <div class="form-group"><label>Date *</label><input type="date" id="cDate" class="form-input" required></div>
-            <div class="form-group"><label>Desc</label><textarea id="cDesc" class="form-textarea"></textarea></div>
-            <button type="submit" class="btn btn-primary w-full">Create</button>
+            <div class="form-group"><label class="form-label">Description</label><textarea id="cDesc" class="form-textarea"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
         </form>`;
-        const m=Modal.show('New Inquiry',html);
-        document.getElementById('addForm').onsubmit=e=>{
-            e.preventDefault();
-            const u=Auth.getUser();
-            const inq={
-                id:'INQ'+Date.now(),
-                clientName:document.getElementById('cName').value,
-                contactNumber:document.getElementById('cPhone').value,
-                email:document.getElementById('cEmail').value,
-                inquiryFor:document.getElementById('cType').value,
-                destination:document.getElementById('cDest').value,
-                travelDate:document.getElementById('cDate').value,
-                description:document.getElementById('cDesc').value,
-                status:'Under Process',
-                inquiryDate:new Date().toISOString(),
-                employeeId:u.id,
-                employeeName:u.name
-            };
-            Storage.saveInquiry(inq);
-            Utils.showToast('Success','Inquiry added');
-            m.remove();
-            Router.navigate('inquiries');
-        };
-    },
+                const m = Modal.show('New Inquiry', html);
+                document.getElementById('addForm').onsubmit = e => {
+                    e.preventDefault();
+                    const u = Auth.getUser();
+                    const type = document.getElementById('cType').value;
+                    if (!type) { Utils.showToast('Required', 'Please select a type', 'error'); return; }
+                    const inq = {
+                        id: 'INQ' + Date.now(),
+                        clientName: document.getElementById('cName').value,
+                        contactNumber: document.getElementById('cPhone').value,
+                        email: document.getElementById('cEmail').value,
+                        inquiryFor: type,
+                        fromLocation: document.getElementById('cFrom').value,
+                        destination: document.getElementById('cDest').value,
+                        travelDate: document.getElementById('cDate').value,
+                        description: document.getElementById('cDesc').value,
+                        status: 'Under Process',
+                        inquiryDate: new Date(document.getElementById('cInqDate').value + 'T12:00:00').toISOString(),
+                        employeeId: u.id,
+                        employeeName: u.name
+                    };
+                    Storage.saveInquiry(inq);
+                    Utils.showToast('Success', 'Inquiry added');
+                    m.remove();
+                    Router.navigate('inquiries');
+                };
+            },
+            toggleFromField() {
+                const type = document.getElementById('cType')?.value;
+                const wrap = document.getElementById('fromFieldWrap');
+                if (wrap) wrap.classList.toggle('hidden', !type);
+            },
 
-    // FIXED: FULLY WORKING EDIT FUNCTION
-    edit(id){
-        const inq = Storage.getInquiries().find(i => i.id === id);
-        if (!inq) return;
+            // FIXED: FULLY WORKING EDIT FUNCTION
+            edit(id) {
+                const inq = Storage.getInquiries().find(i => i.id === id);
+                if (!inq) return;
 
-        const html = `
+                const html = `
             <form id="editForm" class="space-y-4">
                 <input type="hidden" value="${inq.id}">
                 <div class="grid grid-cols-2 gap-4">
@@ -642,292 +2530,707 @@ const Inquiries = {
                     <div class="form-group"><label>Phone *</label><input type="text" id="ePhone" class="form-input" value="${inq.contactNumber}" required></div>
                 </div>
                 <div class="form-group"><label>Email</label><input type="email" id="eEmail" class="form-input" value="${inq.email || ''}"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-group"><label>Type *</label>
-                        <select id="eType" class="form-select">
-                            ${['Tickets','Tour Package','Hotel','Others'].map(t => `<option value="${t}" ${inq.inquiryFor===t?'selected':''}>${t}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Dest *</label><input type="text" id="eDest" class="form-input" value="${inq.destination}" required></div>
+                <div class="form-group"><label class="form-label">Type *</label>
+                    <select id="eType" class="form-select">
+                        ${['Tickets', 'Hotels', 'Tour Package', 'Others'].map(t => `<option value="${t}" ${inq.inquiryFor === t ? 'selected' : ''}>${t}</option>`).join('')}
+                    </select>
                 </div>
-                <div class="form-group"><label>Date *</label><input type="date" id="eDate" class="form-input" value="${inq.travelDate}" required></div>
+                <div class="form-group"><label class="form-label">From</label><input type="text" id="eFrom" class="form-input" value="${Utils.escapeHtml(inq.fromLocation || '')}"></div>
+                <div class="form-group"><label class="form-label">Dest *</label><input type="text" id="eDest" class="form-input" value="${Utils.escapeHtml(inq.destination)}" required></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label class="form-label">Inquiry Date *</label><input type="date" id="eInqDate" class="form-input" value="${(inq.inquiryDate || '').slice(0, 10)}" required></div>
+                    <div class="form-group"><label class="form-label">Travel Date *</label><input type="date" id="eDate" class="form-input" value="${inq.travelDate}" required></div>
+                </div>
                 <div class="form-group"><label>Desc</label><textarea id="eDesc" class="form-textarea">${inq.description || ''}</textarea></div>
                 <button type="submit" class="btn btn-primary w-full">Update Inquiry</button>
             </form>`;
 
-        const m = Modal.show('Edit Inquiry', html);
-        document.getElementById('editForm').onsubmit = e => {
-            e.preventDefault();
-            inq.clientName = document.getElementById('eName').value;
-            inq.contactNumber = document.getElementById('ePhone').value;
-            inq.email = document.getElementById('eEmail').value;
-            inq.inquiryFor = document.getElementById('eType').value;
-            inq.destination = document.getElementById('eDest').value;
-            inq.travelDate = document.getElementById('eDate').value;
-            inq.description = document.getElementById('eDesc').value;
+                const m = Modal.show('Edit Inquiry', html);
+                document.getElementById('editForm').onsubmit = e => {
+                    e.preventDefault();
+                    inq.clientName = document.getElementById('eName').value;
+                    inq.contactNumber = document.getElementById('ePhone').value;
+                    inq.email = document.getElementById('eEmail').value;
+                    inq.inquiryFor = document.getElementById('eType').value;
+                    inq.fromLocation = document.getElementById('eFrom').value;
+                    inq.destination = document.getElementById('eDest').value;
+                    inq.travelDate = document.getElementById('eDate').value;
+                    inq.inquiryDate = new Date(document.getElementById('eInqDate').value + 'T12:00:00').toISOString();
+                    inq.description = document.getElementById('eDesc').value;
 
-            Storage.saveInquiry(inq);
-            Utils.showToast('Success', 'Inquiry updated');
-            m.remove();
-            Router.navigate('inquiries');
-        };
-    },
+                    Storage.saveInquiry(inq);
+                    Utils.showToast('Success', 'Inquiry updated');
+                    m.remove();
+                    Router.navigate('inquiries');
+                };
+            },
 
-    status(id, s){
-        const inq=Storage.getInquiries().find(i=>i.id===id);
-        if(!inq) return;
-        if(s==='Successful') this.book(inq);
-        else if(s==='Unsuccessful') this.fail(inq);
-        else {
-            inq.status=s;
-            Storage.saveInquiry(inq);
-            Utils.showToast('Updated',`Status: ${s}`);
-            Router.navigate('inquiries');
-        }
-    },
-    book(inq){
-        const today=new Date().toISOString().split('T')[0];
-        const html=`<form id="bookForm" class="space-y-4">
+            status(id, s) {
+                const inq = Storage.getInquiries().find(i => i.id === id);
+                if (!inq) return;
+                if (s === 'Successful') this.book(inq);
+                else if (s === 'Unsuccessful') this.fail(inq);
+                else {
+                    inq.status = s;
+                    Storage.saveInquiry(inq);
+                    Utils.showToast('Updated', `Status: ${s}`);
+                    Router.navigate('inquiries');
+                }
+            },
+            book(inq) {
+                const today = new Date().toISOString().split('T')[0];
+                const portalCur = Currency.getCode();
+                const modeOpts = this.PAY_MODES.map(m => `<option>${m}</option>`).join('');
+                const html = `<form id="bookForm" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-                <div class="form-group"><label>Closing Date</label><input type="date" id="closeDate" class="form-input" value="${today}"></div>
-                <div class="form-group"><label>Invoice #</label><input type="text" id="inv" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Issued Date *</label><input type="date" id="issuedDate" class="form-input" value="${today}" required></div>
+                <div class="form-group"><label class="form-label">Invoice # *</label><input type="text" id="inv" class="form-input" required></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="form-group"><label>Airline PNR</label><input type="text" id="aPNR" class="form-input"></div>
-                <div class="form-group"><label>GDS PNR</label><input type="text" id="gPNR" class="form-input"></div>
+                <div class="form-group"><label class="form-label">Airline PNR</label><input type="text" id="aPNR" class="form-input"></div>
+                <div class="form-group"><label class="form-label">GDS PNR</label><input type="text" id="gPNR" class="form-input"></div>
             </div>
-            <div class="form-group"><label>Details</label><textarea id="details" class="form-textarea"></textarea></div>
-            <div class="grid grid-cols-3 gap-4">
-                <div class="form-group"><label>Amount</label><input type="number" id="amt" class="form-input" required></div>
-                <div class="form-group"><label>Currency</label><select id="cur" class="form-select"><option>USD</option><option>EUR</option><option>INR</option></select></div>
-                <div class="form-group"><label>Mode</label><select id="mode" class="form-select"><option>Card</option><option>Cash</option><option>Online</option></select></div>
+            <div class="form-group"><label class="form-label">Details</label><textarea id="details" class="form-textarea"></textarea></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group"><label class="form-label">Issued Amount *</label><input type="number" id="amt" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">Sales Amount *</label><input type="number" id="salesAmt" class="form-input" required></div>
             </div>
+            <div class="form-group"><label class="form-label">Payment Status *</label>
+                <select id="payStatus" class="form-select" onchange="Inquiries.syncPayForm()">
+                    <option>Pending</option><option>Partially Paid</option><option>Paid</option>
+                </select>
+            </div>
+            <div id="paidFields" class="hidden grid grid-cols-2 gap-4">
+                <div class="form-group"><label class="form-label">Amount *</label><input type="number" id="paidAmt" class="form-input"></div>
+                <div class="form-group"><label class="form-label">Payment Mode *</label><select id="paidMode" class="form-select">${modeOpts}</select></div>
+            </div>
+            <div id="partialBlock" class="hidden">
+                <label class="form-label">Partial payments</label>
+                <div id="partialRows"></div>
+                <button type="button" class="btn btn-outline btn-sm mt-4" onclick="Inquiries.addPartialRow()">+ Add partial payment</button>
+            </div>
+            <div class="form-group"><label class="form-label">Remarks</label><textarea id="payRemarks" class="form-textarea" placeholder="Notes about payment or booking"></textarea></div>
+            <input type="hidden" id="cur" value="${portalCur}">
             <button type="submit" class="btn btn-primary w-full">Create Booking</button>
         </form>`;
-        const m=Modal.show('Mark Successful',html);
-        document.getElementById('bookForm').onsubmit=e=>{
-            e.preventDefault();
-            const u=Auth.getUser();
-            const bk={
-                id:'BK'+Date.now(),
-                inquiryId:inq.id,
-                clientName:inq.clientName,
-                contactNumber:inq.contactNumber,
-                email:inq.email,
-                inquiryDate:inq.inquiryDate,
-                closingDate:document.getElementById('closeDate').value,
-                invoiceNumber:document.getElementById('inv').value,
-                airlinePNR:document.getElementById('aPNR').value,
-                gdsPNR:document.getElementById('gPNR').value,
-                bookingDetails:document.getElementById('details').value,
-                paymentStatus:'Successful',
-                amount:parseFloat(document.getElementById('amt').value),
-                currency:document.getElementById('cur').value,
-                paymentMode:document.getElementById('mode').value,
-                employeeId:u.id,
-                employeeName:u.name,
-                destination:inq.destination,
-                travelDate:inq.travelDate
-            };
-            Storage.saveBooking(bk);
-            inq.status='Successful';
-            inq.closingDate=bk.closingDate;
-            Storage.saveInquiry(inq);
-            Utils.showToast('Success','Booking created');
-            m.remove();
-            Router.navigate('inquiries');
-        };
-    },
-    fail(inq){
-        const html=`<form id="failForm"><div class="form-group"><label>Reason</label><textarea id="reason" class="form-textarea" required></textarea></div>
+                const m = Modal.show('Mark Successful', html);
+                this.syncPayForm();
+                document.getElementById('bookForm').onsubmit = e => {
+                    e.preventDefault();
+                    const payStatus = document.getElementById('payStatus').value;
+                    const issuedDate = document.getElementById('issuedDate').value;
+                    let paymentMode = '';
+                    let paidAmount;
+                    let partialPayments = [];
+                    if (payStatus === 'Paid') {
+                        paidAmount = parseFloat(document.getElementById('paidAmt').value);
+                        if (Number.isNaN(paidAmount)) { Utils.showToast('Required', 'Enter paid amount', 'error'); return; }
+                        paymentMode = document.getElementById('paidMode').value;
+                    } else if (payStatus === 'Partially Paid') {
+                        partialPayments = this.collectPartialRows();
+                        if (!partialPayments.length) { Utils.showToast('Required', 'Add at least one partial payment', 'error'); return; }
+                    }
+                    const u = Auth.getUser();
+                    const bk = {
+                        id: 'BK' + Date.now(),
+                        inquiryId: inq.id,
+                        clientName: inq.clientName,
+                        contactNumber: inq.contactNumber,
+                        email: inq.email,
+                        inquiryDate: inq.inquiryDate,
+                        issuedDate,
+                        closingDate: issuedDate,
+                        invoiceNumber: document.getElementById('inv').value,
+                        airlinePNR: document.getElementById('aPNR').value,
+                        gdsPNR: document.getElementById('gPNR').value,
+                        bookingDetails: document.getElementById('details').value,
+                        paymentStatus: payStatus,
+                        paidAmount,
+                        partialPayments: partialPayments.length ? partialPayments : undefined,
+                        amount: parseFloat(document.getElementById('amt').value),
+                        salesAmount: parseFloat(document.getElementById('salesAmt').value),
+                        currency: document.getElementById('cur').value,
+                        paymentMode,
+                        remarks: document.getElementById('payRemarks').value,
+                        employeeId: u.id,
+                        employeeName: u.name,
+                        destination: inq.destination,
+                        fromLocation: inq.fromLocation,
+                        travelDate: inq.travelDate,
+                        inquiryFor: inq.inquiryFor
+                    };
+                    Storage.saveBooking(bk);
+                    inq.status = 'Successful';
+                    inq.closingDate = issuedDate;
+                    Storage.saveInquiry(inq);
+                    Utils.showToast('Success', 'Booking created');
+                    m.remove();
+                    Router.navigate('inquiries');
+                };
+            },
+            partialRowHtml() {
+                const modeOpts = this.PAY_MODES.map(m => `<option>${m}</option>`).join('');
+                return `<div class="partial-pay-row partial-row">
+            <div class="form-group" style="margin:0"><label class="form-label">Partially paid amount</label><input type="number" class="form-input partial-amt" required></div>
+            <div class="form-group" style="margin:0"><label class="form-label">Payment mode</label><select class="form-select partial-mode">${modeOpts}</select></div>
+            <button type="button" class="btn btn-ghost icon-btn" title="Remove" onclick="this.closest('.partial-row').remove()">−</button>
+        </div>`;
+            },
+            addPartialRow() {
+                const box = document.getElementById('partialRows');
+                if (box) { box.insertAdjacentHTML('beforeend', this.partialRowHtml()); }
+            },
+            collectPartialRows() {
+                const rows = [];
+                document.querySelectorAll('#partialRows .partial-row').forEach(row => {
+                    const amt = parseFloat(row.querySelector('.partial-amt')?.value);
+                    const mode = row.querySelector('.partial-mode')?.value;
+                    if (!Number.isNaN(amt) && mode) rows.push({ amount: amt, mode });
+                });
+                return rows;
+            },
+            syncPayForm() {
+                const st = document.getElementById('payStatus')?.value;
+                const paid = document.getElementById('paidFields');
+                const partial = document.getElementById('partialBlock');
+                if (paid) paid.classList.toggle('hidden', st !== 'Paid');
+                if (partial) {
+                    partial.classList.toggle('hidden', st !== 'Partially Paid');
+                    const rows = document.getElementById('partialRows');
+                    if (st === 'Partially Paid' && rows && !rows.children.length) this.addPartialRow();
+                }
+            },
+            fail(inq) {
+                const html = `<form id="failForm"><div class="form-group"><label>Reason</label><textarea id="reason" class="form-textarea" required></textarea></div>
             <button type="submit" class="btn btn-primary w-full">Mark Unsuccessful</button></form>`;
-        const m=Modal.show('Mark Unsuccessful',html);
-        document.getElementById('failForm').onsubmit=e=>{
-            e.preventDefault();
-            inq.status='Unsuccessful';
-            inq.reason=document.getElementById('reason').value;
-            Storage.saveInquiry(inq);
-            Utils.showToast('Updated','Marked unsuccessful');
-            m.remove();
-            Router.navigate('inquiries');
+                const m = Modal.show('Mark Unsuccessful', html);
+                document.getElementById('failForm').onsubmit = e => {
+                    e.preventDefault();
+                    inq.status = 'Unsuccessful';
+                    inq.reason = document.getElementById('reason').value;
+                    Storage.saveInquiry(inq);
+                    Utils.showToast('Updated', 'Marked unsuccessful');
+                    m.remove();
+                    Router.navigate('inquiries');
+                };
+            },
+            del(id) {
+                if (confirm('Delete this inquiry? This cannot be undone.')) {
+                    Storage.deleteInquiry(id);
+                    Utils.showToast('Deleted', 'Inquiry removed');
+                    Router.navigate('inquiries');
+                }
+            }
         };
-    },
-    del(id){
-        if(confirm('Delete this inquiry? This cannot be undone.')){
-            Storage.deleteInquiry(id);
-            Utils.showToast('Deleted','Inquiry removed');
-            Router.navigate('inquiries');
-        }
-    }
-};
-/* ---------- Reports ---------- */
-const Reports = {
-    charts: {}, period: 'monthly', emp: 'all',
-    render(){
-        const u=Auth.getUser();
-        const emps=Storage.getEmployees();
-        const content=`
+        /* ---------- Details (Completed / Upcoming travel) ---------- */
+        const Details = {
+            SECTION: 'details',
+            tab: 'upcoming',
+            render() {
+                const content = `<div class="space-y-6"><div class="card"><div class="card-header"><div class="card-title">Details</div>
+            <div class="card-description">Completed and upcoming travel records</div></div>
+            <div class="card-content">
+                <div class="sub-tabs">
+                    <button type="button" class="sub-tab ${this.tab === 'upcoming' ? 'active' : ''}" onclick="Details.switchTab('upcoming')">Upcoming Travel</button>
+                    <button type="button" class="sub-tab ${this.tab === 'completed' ? 'active' : ''}" onclick="Details.switchTab('completed')">Completed Travel</button>
+                </div>
+                <div class="filters-bar">
+                    <div class="form-group"><label class="form-label">From</label><input type="date" id="detDateFrom" class="form-input" onchange="Details.refresh()"></div>
+                    <div class="form-group"><label class="form-label">To</label><input type="date" id="detDateTo" class="form-input" onchange="Details.refresh()"></div>
+                    <div class="form-group" style="flex:2"><label class="form-label">Search</label>
+                        <input type="text" id="detSearch" class="form-input" placeholder="Client, PNR, destination, invoice…" oninput="Details.refresh()">
+                    </div>
+                </div>
+                <div class="export-bar">
+                    <button class="btn btn-outline btn-sm" onclick="Details.exportPdf()">Download PDF</button>
+                    <button class="btn btn-outline btn-sm" onclick="Details.exportExcel()">Download Excel</button>
+                </div>
+                <div id="detailsTable"><p class="text-center" style="padding:16px;color:var(--muted-foreground)">Loading…</p></div>
+            </div></div></div>`;
+                return Layout.render('Details', content);
+            },
+            switchTab(t) { this.tab = t; MonthGroups.reset(this.SECTION); Router.navigate('details'); },
+            getBookings() {
+                const u = Auth.getUser();
+                return Storage.getBookings().filter(b => u.role === 'admin' || b.employeeId === u.id);
+            },
+            filtered() {
+                let list = this.getBookings();
+                if (this.tab === 'completed') list = list.filter(b => Utils.isTravelBeforeToday(b.travelDate));
+                else list = list.filter(b => Utils.isTravelOnOrAfterToday(b.travelDate));
+                const fromEl = document.getElementById('detDateFrom');
+                const toEl = document.getElementById('detDateTo');
+                if (fromEl?.value) {
+                    const f = Utils.parseDateOnly(fromEl.value);
+                    if (f) list = list.filter(b => { const td = Utils.parseDateOnly(b.travelDate); return td && td >= f; });
+                }
+                if (toEl?.value) {
+                    const t = Utils.parseDateOnly(toEl.value);
+                    if (t) { t.setHours(23, 59, 59, 999); list = list.filter(b => { const td = Utils.parseDateOnly(b.travelDate); return td && td <= t; }); }
+                }
+                const q = (document.getElementById('detSearch')?.value || '').toLowerCase();
+                if (q) list = list.filter(b => JSON.stringify(b).toLowerCase().includes(q));
+                return list.sort((a, b) => Utils.compareDateOnly(a.travelDate, b.travelDate));
+            },
+            tableHtml() {
+                const list = this.filtered();
+                if (!list.length) return '<p class="text-center" style="padding:24px;color:var(--muted-foreground)">No records</p>';
+                const groups = new Map();
+                list.forEach(b => {
+                    const k = Utils.monthKey(b.travelDate);
+                    if (!groups.has(k)) groups.set(k, []);
+                    groups.get(k).push(b);
+                });
+                let html = '<div class="page-split" id="detailsPreviewWrap"><div><div class="table-container"><table class="table table-bordered"><thead><tr><th>Sr. No.</th><th>Invoice</th><th>Client</th><th>Contact</th><th>From</th><th>Dest</th><th>Travel</th><th>PNR / GDS</th><th>Flight / package</th><th>Issued</th><th>Sales</th><th>Payment</th></tr></thead><tbody>';
+                const sec = this.SECTION;
+                Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0])).forEach(([key, items]) => {
+                    html += MonthGroups.headerRow(12, key, Utils.monthLabel(key), sec, null);
+                    let sr = 0;
+                    items.forEach(b => {
+                        sr++;
+                        const urgent = this.tab === 'upcoming' && Utils.daysUntil(b.travelDate) >= 0 && Utils.daysUntil(b.travelDate) <= 3;
+                        const hc = MonthGroups.hiddenClass(sec, key);
+                        html += `<tr class="month-data-row data-animate tr-clickable${hc} ${urgent ? 'upcoming-urgent' : ''}" data-month-group="${key}" data-section="${sec}" onclick="Details.openPreview('${b.id}')">
+                    <td>${sr}</td><td class="font-mono">${Utils.escapeHtml(b.invoiceNumber)}</td>
+                    <td>${Utils.escapeHtml(b.clientName)}</td>
+                    <td>${Utils.escapeHtml(b.contactNumber || '—')}</td>
+                    <td>${Utils.escapeHtml(b.fromLocation || '—')}</td>
+                    <td>${Utils.escapeHtml(b.destination)}</td>
+                    <td>${Utils.formatDate(b.travelDate)}</td>
+                    <td class="font-mono">${Utils.escapeHtml(b.airlinePNR || '—')} / ${Utils.escapeHtml(b.gdsPNR || '—')}</td>
+                    <td>${Utils.escapeHtml(b.bookingDetails || '—')}</td>
+                    <td>${Utils.formatCurrency(Utils.issuedAmount(b))}</td>
+                    <td>${Utils.formatCurrency(Utils.salesAmount(b))}</td>
+                    <td><span class="badge ${Utils.getStatusBadgeClass(b.paymentStatus)}">${Utils.escapeHtml(b.paymentStatus || '—')}</span></td>
+                </tr>`;
+                    });
+                });
+                html += '</tbody></table></div></div></div>';
+                this.lastFiltered = list;
+                this.lastMonthKeys = Array.from(groups.keys()).sort((a, b) => a.localeCompare(b));
+                return html;
+            },
+            openPreview(id) {
+                const b = Storage.getBookings().find(x => x.id === id);
+                if (b) Preview.mount('detailsPreviewWrap', Preview.booking(b));
+            },
+            refresh() {
+                const el = document.getElementById('detailsTable');
+                if (el) el.innerHTML = this.tableHtml();
+                MonthGroups.syncVisible(this.SECTION, this.lastMonthKeys || []);
+            },
+            exportRow(b, sr) {
+                return [sr, b.invoiceNumber, b.clientName, b.contactNumber || '', b.fromLocation || '', b.destination, Utils.formatDate(b.travelDate), `${b.airlinePNR || ''} / ${b.gdsPNR || ''}`, b.bookingDetails || '', b.amount, b.salesAmount ?? b.amount, b.paymentStatus];
+            },
+            exportPdf() {
+                const list = this.lastFiltered || this.filtered();
+                const title = this.tab === 'upcoming' ? 'Upcoming_Travel' : 'Completed_Travel';
+                const headers = ['Sr. No.', 'Invoice', 'Client', 'Contact', 'From', 'Dest', 'Travel', 'PNR/GDS', 'Details', 'Issued', 'Sales', 'Payment'];
+                const map = new Map();
+                list.forEach(b => { const k = Utils.monthKey(b.travelDate); if (!map.has(k)) map.set(k, []); map.get(k).push(b); });
+                const groups = Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([k, items]) => { let s = 0; return { label: Utils.monthLabel(k), rows: items.map(b => this.exportRow(b, ++s)) }; });
+                ExportUtil.downloadPdf(title, headers, [], groups);
+            },
+            exportExcel() {
+                const list = this.lastFiltered || this.filtered();
+                const title = this.tab === 'upcoming' ? 'Upcoming_Travel' : 'Completed_Travel';
+                const headers = ['Sr. No.', 'Invoice', 'Client', 'Contact', 'From', 'Dest', 'Travel', 'PNR/GDS', 'Details', 'Issued', 'Sales', 'Payment'];
+                const map = new Map();
+                list.forEach(b => { const k = Utils.monthKey(b.travelDate); if (!map.has(k)) map.set(k, []); map.get(k).push(b); });
+                const groups = Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([k, items]) => { let s = 0; return { label: Utils.monthLabel(k), rows: items.map(b => this.exportRow(b, ++s)) }; });
+                ExportUtil.downloadExcel(title, headers, [], groups);
+            }
+        };
+
+        /* ---------- Reports ---------- */
+        const Reports = {
+            charts: {}, period: 'monthly', emp: 'all',
+            render() {
+                const u = Auth.getUser();
+                const emps = Storage.getEmployees();
+                const content = `
             <div class="space-y-6"><div class="card"><div class="card-header"><div class="card-title">Reports</div></div>
                 <div class="card-content">
                     <div class="flex gap-4 mb-4">
                         <select id="period" class="form-select" onchange="Reports.change('period',this.value)">
                             <option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option>
                         </select>
-                        ${u.role==='admin'?`<select id="emp" class="form-select" onchange="Reports.change('emp',this.value)">
-                            <option value="all">All</option>${emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}</select>`:''}
+                        ${u.role === 'admin' ? `<select id="emp" class="form-select" onchange="Reports.change('emp',this.value)">
+                            <option value="all">All</option>${emps.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select>` : ''}
                     </div>
                     <div class="space-y-6">
                         <div><h3>Inquiry Status</h3><div class="chart-container"><canvas id="statusChart"></canvas></div></div>
-                        <div><h3>Revenue Trend</h3><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
+                        <div><h3>Sales Revenue Trend</h3><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
+                        <div><h3>Net Profit (Sales − Issued)</h3><div class="chart-container"><canvas id="profitChart"></canvas></div></div>
                     </div>
                 </div></div>
                 <div class="grid grid-cols-3 gap-4">
                     <div class="card"><div class="card-content text-center"><div class="text-3xl font-bold" id="totalInq">0</div><div>Total Inquiries</div></div></div>
                     <div class="card"><div class="card-content text-center"><div class="text-3xl font-bold text-var(--success)" id="successRate">0%</div><div>Success Rate</div></div></div>
-                    <div class="card"><div class="card-content text-center"><div class="text-3xl font-bold text-var(--accent)" id="totalRev">$0</div><div>Total Revenue</div></div></div>
+                    <div class="card"><div class="card-content text-center"><div class="text-3xl font-bold text-var(--accent)" id="totalRev">$0</div><div>Total Sales Revenue</div></div></div>
                 </div></div>`;
-        return Layout.render('Reports', content);
-    },
-    change(type, val){ this[type]=val; this.update(); },
-    update(){
-        const list=this.filter();
-        const status=this.statusData(list);
-        const rev=this.revenueData();
-        document.getElementById('totalInq').textContent=list.length;
-        const succ=list.filter(i=>i.status==='Successful').length;
-        document.getElementById('successRate').textContent= list.length?Math.round(succ/list.length*100)+'%':'0%';
-        document.getElementById('totalRev').textContent='$'+rev.reduce((a,[,v])=>a+v,0).toFixed(0);
+                return Layout.render('Reports', content);
+            },
+            change(type, val) { this[type] = val; this.update(); },
+            update() {
+                const list = this.filter();
+                const status = this.statusData(list);
+                const rev = this.revenueData();
+                const profit = this.profitData();
+                document.getElementById('totalInq').textContent = list.length;
+                const succ = list.filter(i => i.status === 'Successful').length;
+                document.getElementById('successRate').textContent = list.length ? Math.round(succ / list.length * 100) + '%' : '0%';
+                document.getElementById('totalRev').textContent = Utils.formatCurrency(rev.reduce((a, [, v]) => a + v, 0));
 
-        this.renderChart('statusChart', 'bar', status.map(([l])=>l), [
-            {label:'Success',data:status.map(([,d])=>d.success||0),backgroundColor:'hsl(142,76%,36%)'},
-            {label:'Process',data:status.map(([,d])=>d.process||0),backgroundColor:'hsl(38,92%,50%)'},
-            {label:'Fail',data:status.map(([,d])=>d.fail||0),backgroundColor:'hsl(0,74%,51%)'}
-        ]);
-        this.renderChart('revenueChart', 'line', rev.map(([l])=>l), [{
-            label:'Revenue',data:rev.map(([,v])=>v),borderColor:'hsl(200,95%,42%)',backgroundColor:'hsla(200,95%,42%,.1)',tension:0.3,fill:true
-        }]);
-    },
-    filter(){
-        let list=Storage.getInquiries();
-        const u=Auth.getUser();
-        if(u.role==='employee') list=list.filter(i=>i.employeeId===u.id);
-        else if(this.emp!=='all') list=list.filter(i=>i.employeeId===this.emp);
-        return list;
-    },
-    statusData(list){
-        const map=new Map();
-        list.forEach(i=>{
-            const d=new Date(i.inquiryDate);
-            const key=this.key(d);
-            if(!map.has(key)) map.set(key,{success:0,process:0,fail:0});
-            const s=map.get(key);
-            if(i.status==='Successful') s.success++;
-            else if(i.status==='Under Process') s.process++;
-            else s.fail++;
-        });
-        return Array.from(map);
-    },
-    revenueData(){
-        let list=Storage.getBookings();
-        const u=Auth.getUser();
-        if(u.role==='employee') list=list.filter(b=>b.employeeId===u.id);
-        else if(this.emp!=='all') list=list.filter(b=>b.employeeId===this.emp);
-        const map=new Map();
-        list.forEach(b=>{
-            const d=new Date(b.closingDate);
-            const key=this.key(d);
-            map.set(key,(map.get(key)||0)+b.amount);
-        });
-        return Array.from(map);
-    },
-    key(d){
-        if(this.period==='weekly') return `Week ${Math.floor(d.getDate()/7)+1}`;
-        if(this.period==='monthly') return d.toLocaleString('default',{month:'short',year:'numeric'});
-        return d.getFullYear().toString();
-    },
-    renderChart(id, type, labels, datasets){
-        if(this.charts[id]) this.charts[id].destroy();
-        this.charts[id]=new Chart(document.getElementById(id),{
-            type, data:{labels,datasets}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}}}
-        });
-    }
-};
+                this.renderChart('statusChart', 'bar', status.map(([l]) => l), [
+                    { label: 'Success', data: status.map(([, d]) => d.success || 0), backgroundColor: 'hsl(142,76%,36%)' },
+                    { label: 'Process', data: status.map(([, d]) => d.process || 0), backgroundColor: 'hsl(38,92%,50%)' },
+                    { label: 'Fail', data: status.map(([, d]) => d.fail || 0), backgroundColor: 'hsl(0,74%,51%)' }
+                ]);
+                this.renderChart('revenueChart', 'line', rev.map(([l]) => l), [{
+                    label: 'Sales revenue', data: rev.map(([, v]) => v), borderColor: 'hsl(200,95%,42%)', backgroundColor: 'hsla(200,95%,42%,.1)', tension: 0.3, fill: true
+                }]);
+                this.renderChart('profitChart', 'bar', profit.map(([l]) => l), [{
+                    label: 'Net profit', data: profit.map(([, v]) => v), backgroundColor: 'hsl(185,85%,45%)'
+                }]);
+            },
+            bookingScope() {
+                let list = Storage.getBookings();
+                const u = Auth.getUser();
+                if (u.role === 'employee') list = list.filter(b => b.employeeId === u.id);
+                else if (this.emp !== 'all') list = list.filter(b => b.employeeId === this.emp);
+                return list;
+            },
+            bookingPeriodDate(b) {
+                const raw = b.issuedDate || b.closingDate || b.travelDate;
+                return Utils.parseDateOnly(raw) || new Date(raw);
+            },
+            filter() {
+                let list = Storage.getInquiries();
+                const u = Auth.getUser();
+                if (u.role === 'employee') list = list.filter(i => i.employeeId === u.id);
+                else if (this.emp !== 'all') list = list.filter(i => i.employeeId === this.emp);
+                return list;
+            },
+            statusData(list) {
+                const map = new Map();
+                list.forEach(i => {
+                    const d = new Date(i.inquiryDate);
+                    const key = this.key(d);
+                    if (!map.has(key)) map.set(key, { success: 0, process: 0, fail: 0 });
+                    const s = map.get(key);
+                    if (i.status === 'Successful') s.success++;
+                    else if (i.status === 'Under Process') s.process++;
+                    else s.fail++;
+                });
+                return Array.from(map);
+            },
+            revenueData() {
+                const map = new Map();
+                this.bookingScope().forEach(b => {
+                    const d = this.bookingPeriodDate(b);
+                    const key = this.key(d);
+                    map.set(key, (map.get(key) || 0) + Utils.salesAmount(b));
+                });
+                return Array.from(map);
+            },
+            profitData() {
+                const map = new Map();
+                this.bookingScope().forEach(b => {
+                    const d = this.bookingPeriodDate(b);
+                    const key = this.key(d);
+                    map.set(key, (map.get(key) || 0) + Utils.profitAmount(b));
+                });
+                return Array.from(map);
+            },
+            key(d) {
+                if (this.period === 'weekly') return `Week ${Math.floor(d.getDate() / 7) + 1}`;
+                if (this.period === 'monthly') return d.toLocaleString('default', { month: 'short', year: 'numeric' });
+                return d.getFullYear().toString();
+            },
+            renderChart(id, type, labels, datasets) {
+                if (this.charts[id]) this.charts[id].destroy();
+                this.charts[id] = new Chart(document.getElementById(id), {
+                    type, data: { labels, datasets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+                });
+            }
+        };
 
-/* ---------- Router ---------- */
-const Router = {
-    navigate(page){
-        // Close sidebar and remove overlay before navigation to prevent blur issues
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar && sidebar.classList.contains('open')) {
-            toggleSidebar();
-        }
-        const overlay = document.querySelector('.sidebar-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
+        /* ---------- Settings Page ---------- */
+        const Settings = {
+            render() {
+                const u = Auth.getUser();
+                const isFirebase = u?.source === 'firebase';
+                const content = `
+            <div class="space-y-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Account Settings</div>
+                        <div class="card-description">Manage your account preferences and profile</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">Profile Information</h3>
+                            <div class="info-grid">
+                                <div><strong>Name</strong><br>${Utils.escapeHtml(u?.name || '—')}</div>
+                                <div><strong>Email</strong><br>${Utils.escapeHtml(u?.email || '—')}</div>
+                                <div><strong>Role</strong><br><span class="badge badge-secondary">${Utils.escapeHtml(u?.role || '—')}</span></div>
+                                <div><strong>Account type</strong><br>${isFirebase ? 'Firebase account' : 'Demo account'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        if(!Auth.isAuthenticated() && page!=='login'){ this.renderLogin(); return; }
-        const app=document.getElementById('app');
-        let html = '';
-        switch(page){
-            case 'login': this.renderLogin(); return;
-            case 'dashboard': html=Dashboard.render(); break;
-            case 'my-bookings': html=MyBookings.render(); break;
-            case 'inquiries': html=Inquiries.render(); break;
-            case 'reports': html=Reports.render(); break;
-            default: html=Dashboard.render();
-        }
-        app.innerHTML=html;
-        Layout.updateActiveNav(page);
-        Theme.renderToggle();
-        setTimeout(animateElements, 50);
-        if(page==='reports') setTimeout(()=>Reports.update(), 100);
-        if(page==='my-bookings') setTimeout(MyBookings.filter, 100);
-    },
-    renderLogin(){
-        // Ensure no overlay on login
-        const overlay = document.querySelector('.sidebar-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
-        const app=document.getElementById('app');
-        app.innerHTML=`
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Theme</div>
+                        <div class="card-description">Appearance preferences</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-title">Dark / Light Mode</div>
+                                <div class="settings-row-desc">Toggle the colour theme</div>
+                            </div>
+                            <button class="btn btn-outline" onclick="Theme.toggle()">Toggle Theme</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="border-color:var(--destructive);">
+                    <div class="card-header">
+                        <div class="card-title" style="color:var(--destructive);">Danger Zone</div>
+                        <div class="card-description">Irreversible actions — proceed with caution</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-title" style="color:var(--destructive);">Delete Account</div>
+                                <div class="settings-row-desc">Permanently delete your account and all associated data. This cannot be undone.</div>
+                            </div>
+                            <button class="btn" style="background:var(--destructive);color:#fff;" onclick="Settings.confirmDeleteAccount()">
+                                🗑 Delete Account
+                            </button>
+                        </div>
+                        <div class="settings-row" style="margin-top:12px;">
+                            <div>
+                                <div class="settings-row-title">Sign Out</div>
+                                <div class="settings-row-desc">Log out of your current session</div>
+                            </div>
+                            <button class="btn btn-outline" onclick="handleLogout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+                return Layout.render('Settings', content);
+            },
+            confirmDeleteAccount() {
+                const u = Auth.getUser();
+                const isDemo = u?.source === 'demo';
+                const html = `
+            <div style="text-align:center;padding:8px 0">
+                <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+                <p style="font-size:16px;font-weight:600;color:var(--destructive);margin-bottom:8px;">Delete your account permanently?</p>
+                <p style="font-size:14px;color:var(--muted-foreground);margin-bottom:24px;">
+                    ${isDemo ? 'Demo accounts cannot be deleted. This action is only available for registered Firebase accounts.' : 'This will permanently delete your account and all your data. <strong>This action cannot be undone.</strong>'}
+                </p>
+                ${isDemo ? '' : `
+                <p style="font-size:14px;margin-bottom:16px;">Please type <strong>DELETE</strong> to confirm:</p>
+                <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Type DELETE here" style="text-align:center;letter-spacing:4px;font-weight:bold;">
+                `}
+                <div style="display:flex;gap:12px;margin-top:20px;">
+                    <button class="btn btn-outline w-full" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    ${isDemo ? '' : `<button class="btn w-full" style="background:var(--destructive);color:#fff;" id="confirmDeleteBtn" onclick="Settings.executeDeleteAccount(this)">Delete Account</button>`}
+                </div>
+            </div>`;
+                Modal.show('Delete Account', html, '');
+            },
+            async executeDeleteAccount(btn) {
+                const input = document.getElementById('deleteConfirmInput');
+                if (!input || input.value.trim() !== 'DELETE') {
+                    Utils.showToast('Error', 'Please type DELETE to confirm', 'error');
+                    return;
+                }
+                btn.disabled = true;
+                btn.textContent = 'Deleting…';
+                const result = await Auth.deleteAccount();
+                if (result.success) {
+                    Utils.showToast('Account deleted', 'Your account has been permanently deleted');
+                    setTimeout(() => Router.navigate('login'), 1500);
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Delete Account';
+                    Utils.showToast('Error', result.error, 'error');
+                }
+            }
+        };
+
+        /* ---------- Router ---------- */
+        const Router = {
+            navigate(page) {
+                if (page && page !== 'login') window.location.hash = page;
+                // Close sidebar and remove overlay before navigation to prevent blur issues
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                const publicPages = ['login', 'signup'];
+                if (!Auth.isAuthenticated() && !publicPages.includes(page)) { this.renderLogin(); return; }
+                const app = document.getElementById('app');
+                let html = '';
+                switch (page) {
+                    case 'login': this.renderLogin(); return;
+                    case 'signup': this.renderSignup(); return;
+                    case 'dashboard': html = Dashboard.render(); break;
+                    case 'my-bookings': html = MyBookings.render(); break;
+                    case 'inquiries': html = Inquiries.render(); break;
+                    case 'details': html = Details.render(); break;
+                    case 'reports': html = Reports.render(); break;
+                    case 'settings': html = Settings.render(); break;
+                    default: html = Dashboard.render();
+                }
+                app.innerHTML = html;
+                Layout.updateActiveNav(page);
+                Theme.renderToggle();
+                setTimeout(animateElements, 50);
+                if (page === 'reports') setTimeout(() => Reports.update(), 100);
+                if (page === 'my-bookings') setTimeout(() => MyBookings.afterRender(), 50);
+                if (page === 'inquiries') {
+                    Inquiries.previewId = null;
+                    Preview.close();
+                    setTimeout(() => { Inquiries.applyFilters(); animateElements(); }, 50);
+                }
+                if (page === 'details') setTimeout(() => { Details.refresh(); animateElements(); }, 50);
+                const curSel = document.getElementById('currencySelect');
+                if (curSel) curSel.value = Currency.getCode();
+            },
+            renderLogin() {
+                // Ensure no overlay on login
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) overlay.remove();
+                const app = document.getElementById('app');
+                app.innerHTML = `
             <div class="login-container">
                 <div class="card login-card">
                     <div class="card-content">
                         <div class="login-header">
                             <div class="login-logo">AJ</div>
                             <h1>A J Travels</h1>
-                            <p>Sign in to continue</p>
+                            <p>Sign in to your account</p>
                         </div>
                         <form id="loginForm">
-                            <div class="form-group"><label>Email</label><input type="email" id="loginEmail" class="form-input" value="admin@ajtravels.com" required></div>
-                            <div class="form-group"><label>Password</label><input type="password" id="loginPassword" class="form-input" value="password" required></div>
-                            <button type="submit" class="btn btn-primary w-full">Sign In</button>
+                            <div class="form-group">
+                                <label class="form-label">Email or Contact</label>
+                                <input type="text" id="loginEmail" class="form-input" placeholder="email@example.com or phone number" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                ${Utils.passwordInput('loginPassword')}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full" id="loginBtn">Sign In</button>
                         </form>
-                        <div class="demo-credentials"><p>Demo:</p><p>admin@ajtravels.com</p><p>employee@ajtravels.com</p><p>password</p></div>
+                        <div class="auth-links">
+                            <a onclick="Router.navigate('signup')">Create account</a>
+                        </div>
                     </div>
                 </div>
             </div>`;
-        setTimeout(() => document.querySelector('.login-card')?.classList.add('animate'), 50);
-        document.getElementById('loginForm').onsubmit=e=>{
-            e.preventDefault();
-            const res=Auth.login(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value);
-            if(res.success){ Utils.showToast('Welcome','Login successful'); this.navigate('dashboard'); }
-            else Utils.showToast('Error',res.error,'error');
+                setTimeout(() => document.querySelector('.login-card')?.classList.add('animate'), 50);
+                document.getElementById('loginForm').onsubmit = async e => {
+                    e.preventDefault();
+                    const btn = document.getElementById('loginBtn');
+                    btn.disabled = true; btn.textContent = 'Signing in…';
+                    const res = await Auth.login(
+                        document.getElementById('loginEmail').value.trim(),
+                        document.getElementById('loginPassword').value
+                    );
+                    btn.disabled = false; btn.textContent = 'Sign In';
+                    if (res.success) { Utils.showToast('Welcome', 'Login successful'); this.navigate('dashboard'); }
+                    else Utils.showToast('Error', res.error, 'error');
+                };
+            },
+            renderSignup() {
+                const app = document.getElementById('app');
+                app.innerHTML = `
+            <div class="login-container">
+                <div class="card login-card" style="max-width:480px">
+                    <div class="card-content">
+                        <div class="login-header"><div class="login-logo">AJ</div><h1>Create Account</h1><p>Register with OTP verification</p></div>
+                        <form id="signupForm">
+                            <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="suName" class="form-input" required></div>
+                            <div class="form-group"><label class="form-label">Contact *</label><input type="text" id="suContact" class="form-input" required></div>
+                            <div class="form-group"><label class="form-label">Email Id *</label><input type="email" id="suEmail" class="form-input" required></div>
+                            <div class="form-group"><label class="form-label">Password *</label>${Utils.passwordInput('suPassword')}</div>
+                            <div class="form-group"><label class="form-label">Confirm Password *</label>${Utils.passwordInput('suPassword2')}</div>
+                            <button type="button" class="btn btn-outline w-full mb-4" onclick="Router.generateSignupOtp()">Generate demo OTP</button>
+                            <div id="otpBox" class="otp-box hidden">Demo OTP: <strong id="otpDisplay">------</strong></div>
+                            <div class="form-group"><label class="form-label">Enter OTP *</label><input type="text" id="suOtp" class="form-input" maxlength="6" placeholder="6-digit OTP" required></div>
+                            <button type="submit" class="btn btn-primary w-full">Create Account</button>
+                        </form>
+                        <div class="auth-links"><a onclick="Router.navigate('user-login')">Already have an account?</a></div>
+                    </div>
+                </div>
+            </div>`;
+                this._signupOtp = null;
+                setTimeout(() => document.querySelector('.login-card')?.classList.add('animate'), 50);
+                document.getElementById('signupForm').onsubmit = async e => {
+                    e.preventDefault();
+                    const p1 = document.getElementById('suPassword').value;
+                    const p2 = document.getElementById('suPassword2').value;
+                    if (p1 !== p2) { Utils.showToast('Error', 'Passwords do not match', 'error'); return; }
+                    if (!this._signupOtp) { Utils.showToast('OTP', 'Generate OTP first', 'error'); return; }
+                    const btn = e.target.querySelector('button[type=submit]');
+                    btn.disabled = true;
+                    const res = await Auth.signupFirebase({
+                        fullName: document.getElementById('suName').value,
+                        contact: document.getElementById('suContact').value,
+                        email: document.getElementById('suEmail').value,
+                        password: p1,
+                        otp: document.getElementById('suOtp').value,
+                        expectedOtp: this._signupOtp
+                    });
+                    btn.disabled = false;
+                    if (res.success) { Utils.showToast('Success', 'Account created'); this.navigate('dashboard'); }
+                    else Utils.showToast('Error', res.error, 'error');
+                };
+            },
+            generateSignupOtp() {
+                this._signupOtp = String(Math.floor(100000 + Math.random() * 900000));
+                const box = document.getElementById('otpBox');
+                const disp = document.getElementById('otpDisplay');
+                if (box) { box.classList.remove('hidden'); }
+                if (disp) disp.textContent = this._signupOtp;
+            }
         };
-    }
-};
 
-document.addEventListener('DOMContentLoaded', () => {
-    Theme.init();
-    Router.navigate(Auth.isAuthenticated() ? (window.location.hash.slice(1) || 'dashboard') : 'login');
-    window.addEventListener('hashchange', () => Router.navigate(window.location.hash.slice(1) || 'dashboard'));
-    document.addEventListener('click', e => {
-        const nav = e.target.closest('.nav-item');
-        if (nav?.dataset?.page) Router.navigate(nav.dataset.page);
-    });
-});
-</script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Theme.init();
+            Auth.init();
+            Router.navigate(Auth.isAuthenticated() ? (window.location.hash.slice(1) || 'dashboard') : 'login');
+            window.addEventListener('hashchange', () => Router.navigate(window.location.hash.slice(1) || 'dashboard'));
+            document.addEventListener('click', e => {
+                const nav = e.target.closest('.nav-item');
+                if (nav?.dataset?.page) Router.navigate(nav.dataset.page);
+            });
+        });
+        window.addEventListener('firebase-ready', async () => {
+            // Run the DB availability probe IMMEDIATELY so login/signup know before they try Firestore
+            await FirestoreSync.probe();
+            const u = Auth.getUser();
+            if (u?.source === 'firebase') {
+                // Restore firebase user reference from auth state
+                if (window.Firebase?.auth?.currentUser) {
+                    Auth.firebaseUser = window.Firebase.auth.currentUser;
+                }
+                if (FirestoreSync.dbAvailable === true) await FirestoreSync.init();
+            }
+        });
+    </script>
 </body>
+
 </html>
