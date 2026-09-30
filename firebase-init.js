@@ -1,5 +1,4 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import { getAnalytics } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js';
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -31,7 +30,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-try { getAnalytics(app); } catch (_) { /* local file / blocked analytics */ }
+// Firebase Analytics removed to prevent unhandled promise rejections (200.js errors)
 
 window.Firebase = {
   app,
