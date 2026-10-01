@@ -112,14 +112,15 @@
             width: 40px;
             height: 40px;
             border-radius: 8px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-foreground);
-            font-weight: bold;
-            font-size: 14px;
-            overflow: hidden
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
 
         .sidebar-title h2 {
@@ -713,19 +714,21 @@
             width: 64px;
             height: 64px;
             margin: 0 auto 16px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 16px;
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-foreground);
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             transition: transform .3s
         }
 
         .login-logo:hover {
-            transform: rotate(360deg)
+            transform: scale(1.05)
         }
 
         .login-header {
@@ -1572,6 +1575,9 @@
                     Storage.replaceAll({ inquiries, bookings, employees });
                 } catch (e) {
                     console.warn('Firestore pull failed', e);
+                    if (e.message && e.message.includes("not found")) {
+                        Utils.showToast("Database Not Found", "Firestore database is still setting up or missing. If you just created it, please wait a few minutes and refresh.", "destructive");
+                    }
                 }
             },
 
