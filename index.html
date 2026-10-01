@@ -1422,7 +1422,7 @@
         window.Firebase = {
             app,
             auth: getAuth(app),
-            db: getFirestore(app),
+            db: getFirestore(app, 'default'),
             terminate,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
