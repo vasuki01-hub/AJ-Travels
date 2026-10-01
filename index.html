@@ -1380,7 +1380,63 @@
 
 <body>
     <div id="app"></div>
-    <script type="module" src="firebase-init.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged
+        } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+        import {
+            getFirestore,
+            terminate,
+            collection,
+            doc,
+            getDocs,
+            setDoc,
+            deleteDoc,
+            query,
+            where,
+            getDoc
+        } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPqFG7ssGq1ko4fo_Z7X0E5iNf2itDGUA",
+            authDomain: "aj-travels-7ae50.firebaseapp.com",
+            projectId: "aj-travels-7ae50",
+            storageBucket: "aj-travels-7ae50.firebasestorage.app",
+            messagingSenderId: "90484382183",
+            appId: "1:90484382183:web:bf499841b2c27b815dc542",
+            measurementId: "G-4XDB27Y4CZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        // Firebase Analytics removed to prevent unhandled promise rejections (200.js errors)
+
+        window.Firebase = {
+            app,
+            auth: getAuth(app),
+            db: getFirestore(app),
+            terminate,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            collection,
+            doc,
+            getDocs,
+            setDoc,
+            deleteDoc,
+            query,
+            where,
+            getDoc
+        };
+
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
 
     <script>
         /* ---------- Theme Manager ---------- */
@@ -1466,46 +1522,26 @@
 
         /* ---------- Storage ---------- */
         const Storage = {
-            INQUIRIES_KEY: 'ajTravelsInquiries',
-            BOOKINGS_KEY: 'ajTravelsBookings',
-            EMPLOYEES_KEY: 'ajTravelsEmployees',
+            _inquiries: [],
+            _bookings: [],
+            _employees: [],
 
-            initializeDemoData() {
-                if (!localStorage.getItem(this.INQUIRIES_KEY)) {
-                    const demoInquiries = [
-                        { id: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryFor: 'Tickets', fromLocation: 'Mumbai', description: 'Need tickets to London', destination: 'London', travelDate: '2026-12-15', status: 'Under Process', inquiryDate: new Date().toISOString(), employeeId: '2', employeeName: 'Employee User' },
-                        { id: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryFor: 'Tour Package', fromLocation: 'Delhi', description: 'Family vacation package to Dubai', destination: 'Dubai', travelDate: '2026-03-01', status: 'Successful', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), closingDate: new Date(Date.now() - 86400000).toISOString(), employeeId: '2', employeeName: 'Employee User' }
-                    ];
-                    localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(demoInquiries));
-                }
-                if (!localStorage.getItem(this.BOOKINGS_KEY)) {
-                    const demoBookings = [
-                        { id: 'BK001', inquiryId: 'INQ002', clientName: 'Jane Smith', contactNumber: '+1987654321', email: 'jane@example.com', inquiryDate: new Date(Date.now() - 86400000 * 2).toISOString(), issuedDate: new Date(Date.now() - 86400000).toISOString().slice(0, 10), closingDate: new Date(Date.now() - 86400000).toISOString().slice(0, 10), invoiceNumber: 'INV-2025-001', airlinePNR: 'ABC123', gdsPNR: 'GDS456', bookingDetails: '2 Adults, 1 Child - Dubai Premium Package', paymentStatus: 'Paid', amount: 3500, salesAmount: 4200, paidAmount: 4200, currency: 'USD', paymentMode: 'Card', remarks: '', employeeId: '2', employeeName: 'Employee User', destination: 'Dubai', fromLocation: 'Delhi', travelDate: '2026-08-15', inquiryFor: 'Tour Package' },
-                        { id: 'BK002', inquiryId: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryDate: new Date().toISOString(), issuedDate: new Date().toISOString().slice(0, 10), closingDate: new Date().toISOString().slice(0, 10), invoiceNumber: 'INV-2026-002', airlinePNR: 'LDN99', gdsPNR: 'GDS99', bookingDetails: 'Economy return LHR', paymentStatus: 'Pending', amount: 1200, salesAmount: 1500, currency: 'USD', paymentMode: '', remarks: 'Awaiting payment', employeeId: '2', employeeName: 'Employee User', destination: 'London', fromLocation: 'Mumbai', travelDate: '2026-10-05', inquiryFor: 'Tickets' },
-                        { id: 'BK003', inquiryId: 'INQ001', clientName: 'John Doe', contactNumber: '+1234567890', email: 'john@example.com', inquiryDate: new Date().toISOString(), issuedDate: new Date().toISOString().slice(0, 10), closingDate: new Date().toISOString().slice(0, 10), invoiceNumber: 'INV-2026-003', airlinePNR: 'SEP01', gdsPNR: 'GDS01', bookingDetails: 'Business class — Mumbai to Singapore', paymentStatus: 'Paid', amount: 2000, salesAmount: 2600, paidAmount: 2600, currency: 'USD', paymentMode: 'Card', remarks: '', employeeId: '2', employeeName: 'Employee User', destination: 'Singapore', fromLocation: 'Mumbai', travelDate: '2026-09-30', inquiryFor: 'Tickets' }
-                    ];
-                    localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(demoBookings));
-                }
-                if (!localStorage.getItem(this.EMPLOYEES_KEY)) {
-                    const demoEmployees = [
-                        { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin' },
-                        { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee' }
-                    ];
-                    localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(demoEmployees));
-                }
-            },
+            _writeInquiries(a) { this._inquiries = a; },
+            _writeBookings(a) { this._bookings = a; },
+            _writeEmployees(a) { this._employees = a; },
 
-            _writeInquiries(a) { localStorage.setItem(this.INQUIRIES_KEY, JSON.stringify(a)); },
-            _writeBookings(a) { localStorage.setItem(this.BOOKINGS_KEY, JSON.stringify(a)); },
-            _writeEmployees(a) { localStorage.setItem(this.EMPLOYEES_KEY, JSON.stringify(a)); },
-            getInquiries() { this.initializeDemoData(); const d = localStorage.getItem(this.INQUIRIES_KEY); return d ? JSON.parse(d) : []; },
+            getInquiries() { return this._inquiries; },
             saveInquiry(i) { const a = this.getInquiries(); const idx = a.findIndex(x => x.id === i.id); idx >= 0 ? a[idx] = i : a.push(i); this._writeInquiries(a); FirestoreSync.saveDoc('inquiries', i.id, i); },
             deleteInquiry(id) { let a = this.getInquiries(); a = a.filter(x => x.id !== id); this._writeInquiries(a); FirestoreSync.deleteDoc('inquiries', id); },
-            getBookings() { this.initializeDemoData(); const d = localStorage.getItem(this.BOOKINGS_KEY); return d ? JSON.parse(d) : []; },
+
+            getBookings() { return this._bookings; },
             saveBooking(b) { const a = this.getBookings(); const idx = a.findIndex(x => x.id === b.id); idx >= 0 ? a[idx] = b : a.push(b); this._writeBookings(a); FirestoreSync.saveDoc('bookings', b.id, b); },
             deleteBooking(id) { let a = this.getBookings(); a = a.filter(x => x.id !== id); this._writeBookings(a); FirestoreSync.deleteDoc('bookings', id); },
-            getEmployees() { this.initializeDemoData(); const d = localStorage.getItem(this.EMPLOYEES_KEY); return d ? JSON.parse(d) : []; },
-            saveEmployee(e) { const a = this.getEmployees(); const idx = a.findIndex(x => x.id === e.id); idx >= 0 ? a[idx] = e : a.push(e); this._writeEmployees(a); FirestoreSync.saveDoc('employees', e.id, e); },
+
+            getEmployees() { return this._employees; },
+            saveEmployee(e) { const a = this.getEmployees(); const idx = a.findIndex(x => x.id === e.id); idx >= 0 ? a[idx] = e : a.push(e); this._writeEmployees(a); FirestoreSync.saveDoc('users', e.id, e); },
+            deleteEmployee(id) { let a = this.getEmployees(); a = a.filter(x => x.id !== id); this._writeEmployees(a); FirestoreSync.deleteDoc('users', id); },
+
             replaceAll(data) {
                 if (data.inquiries) this._writeInquiries(data.inquiries);
                 if (data.bookings) this._writeBookings(data.bookings);
@@ -1514,38 +1550,10 @@
         };
 
         const FirestoreSync = {
-            enabled: false,
-            dbAvailable: null, // null=unknown, true=ok, false=not found
-            // One-time DB availability probe using REST API — no WebChannel, no retry loops
-            async probe() {
-                if (this.dbAvailable !== null) return; // already known, skip
-                const F = window.Firebase;
-                if (!F?.db) { this.dbAvailable = false; return; }
-                try {
-                    // Use REST API — simple HTTP GET, no SDK WebChannel
-                    const projectId = F.app.options.projectId;
-                    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/__ping__?pageSize=1`;
-                    const res = await fetch(url);
-                    if (res.status === 404) {
-                        this.dbAvailable = false;
-                        // Terminate the SDK Firestore instance to prevent retry loops
-                        try { await F.terminate(F.db); } catch (_) { }
-                        F.db = null;
-                        console.info('AJ Travels: Firestore not provisioned — running in local-only mode.');
-                    } else {
-                        // 200, 400, 403 all mean DB exists (403 = permission denied but DB is there)
-                        this.dbAvailable = true;
-                    }
-                } catch (e) {
-                    // Network error — assume DB might be available, try anyway
-                    this.dbAvailable = true;
-                }
-            },
+            enabled: true,
+
             async init() {
                 if (!window.Firebase?.db) return;
-                await this.probe(); // ensure availability is known
-                if (!this.dbAvailable) return;
-                this.enabled = true;
                 await this.pullAll();
             },
 
@@ -1561,24 +1569,12 @@
                     const [inquiries, bookings, employees] = await Promise.all([
                         snap('inquiries'), snap('bookings'), snap('employees')
                     ]);
-                    if (inquiries.length || bookings.length || employees.length) {
-                        Storage.replaceAll({ inquiries, bookings, employees: employees.length ? employees : Storage.getEmployees() });
-                    } else {
-                        await this.pushSeedFromLocal();
-                    }
+                    Storage.replaceAll({ inquiries, bookings, employees });
                 } catch (e) {
-                    if (!(e?.message || '').includes('not found'))
-                        console.warn('Firestore pull failed', e);
+                    console.warn('Firestore pull failed', e);
                 }
             },
-            async pushSeedFromLocal() {
-                if (!this.enabled) return;
-                const F = window.Firebase;
-                Storage.initializeDemoData();
-                for (const i of Storage.getInquiries()) await this.saveDoc('inquiries', i.id, i);
-                for (const b of Storage.getBookings()) await this.saveDoc('bookings', b.id, b);
-                for (const e of Storage.getEmployees()) await this.saveDoc('employees', e.id, e);
-            },
+
             async saveDoc(col, id, data) {
                 if (!this.enabled || !window.Firebase?.db) return;
                 try {
@@ -1630,8 +1626,7 @@
                         let name = cred.user.displayName || cred.user.email;
                         let role = 'employee';
                         let contact = '';
-                        // Only try Firestore if we already KNOW it's available (probe ran at startup)
-                        if (FirestoreSync.dbAvailable === true && F.db) {
+                        if (F.db) {
                             try {
                                 const prof = await F.getDoc(F.doc(F.db, 'users', cred.user.uid));
                                 if (prof.exists()) {
@@ -1643,33 +1638,14 @@
                             } catch (_) { }
                         }
                         this.setUser({ id: cred.user.uid, name, email: cred.user.email, contact, role, source: 'firebase' });
-                        if (FirestoreSync.dbAvailable === true) await FirestoreSync.init();
+                        await FirestoreSync.init();
                         return { success: true };
                     } catch (fbErr) {
-                        // If Firebase auth failed with a real auth error, report it
                         const code = fbErr?.code || '';
-                        if (code.startsWith('auth/') && !code.includes('network') && !code.includes('unavailable')) {
-                            // Check if this is a demo fallback account first
-                            const demoResult = this._demoLogin(identifier, password);
-                            if (demoResult.success) return demoResult;
-                            return { success: false, error: this._friendlyAuthError(code) };
-                        }
-                        // Network / other error — try demo fallback
+                        return { success: false, error: this._friendlyAuthError(code) };
                     }
                 }
-                // Demo fallback
-                return this._demoLogin(identifier, password);
-            },
-            _demoLogin(email, password) {
-                const demo = {
-                    'admin@ajtravels.com': { id: '1', name: 'Admin User', email: 'admin@ajtravels.com', role: 'admin', source: 'demo' },
-                    'employee@ajtravels.com': { id: '2', name: 'Employee User', email: 'employee@ajtravels.com', role: 'employee', source: 'demo' }
-                };
-                if (demo[email] && password === 'password') {
-                    this.setUser(demo[email]);
-                    return { success: true };
-                }
-                return { success: false, error: 'Incorrect email or password' };
+                return { success: false, error: 'Firebase not initialized.' };
             },
             _friendlyAuthError(code) {
                 const map = {
@@ -1694,10 +1670,10 @@
                     // Map auth errors — e.g. email-already-in-use
                     return { success: false, error: this._friendlyAuthError(e?.code) || e.message || 'Signup failed' };
                 }
-                // Auth account created — now try Firestore profile (best-effort, non-blocking)
+                // Auth account created — now create Firestore profile
                 const uid = cred.user.uid;
                 const profile = { fullName, contact, email, role: 'employee', createdAt: new Date().toISOString() };
-                if (FirestoreSync.dbAvailable === true && F.db) {
+                if (F.db) {
                     try {
                         await F.setDoc(F.doc(F.db, 'users', uid), profile);
                         const cKey = FirestoreSync.normalizeContact(contact);
@@ -3221,15 +3197,13 @@
             });
         });
         window.addEventListener('firebase-ready', async () => {
-            // Run the DB availability probe IMMEDIATELY so login/signup know before they try Firestore
-            await FirestoreSync.probe();
             const u = Auth.getUser();
             if (u?.source === 'firebase') {
                 // Restore firebase user reference from auth state
                 if (window.Firebase?.auth?.currentUser) {
                     Auth.firebaseUser = window.Firebase.auth.currentUser;
                 }
-                if (FirestoreSync.dbAvailable === true) await FirestoreSync.init();
+                await FirestoreSync.init();
             }
         });
     </script>
