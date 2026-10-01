@@ -1402,7 +1402,8 @@
             deleteDoc,
             query,
             where,
-            getDoc
+            getDoc,
+            onSnapshot
         } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -1435,7 +1436,8 @@
             deleteDoc,
             query,
             where,
-            getDoc
+            getDoc,
+            onSnapshot
         };
 
         window.dispatchEvent(new Event('firebase-ready'));
@@ -1555,30 +1557,42 @@
         const FirestoreSync = {
             enabled: true,
 
-            async init() {
+            _unsubscribes: [],
+
+            init() {
                 if (!window.Firebase?.db) return;
-                await this.pullAll();
+                this.listenAll();
             },
 
-            async pullAll() {
+            listenAll() {
                 if (!this.enabled) return;
                 const F = window.Firebase;
                 if (!F?.db) return;
-                const snap = async (name) => {
-                    const s = await F.getDocs(F.collection(F.db, name));
-                    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Clear previous listeners if any
+                this._unsubscribes.forEach(u => u && u());
+                this._unsubscribes = [];
+
+                const listen = (colName, storageKey) => {
+                    if (!F.onSnapshot) return;
+                    const unsub = F.onSnapshot(F.collection(F.db, colName), (snapshot) => {
+                        const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                        Storage.replaceAll({ [storageKey]: data });
+
+                        // Automatically refresh the current view with the new data
+                        const page = window.location.hash.slice(1) || 'dashboard';
+                        if (['dashboard', 'inquiries', 'bookings', 'employees'].includes(page)) {
+                            Router.navigate(page);
+                        }
+                    }, (error) => {
+                        console.warn(`Firestore listen failed for ${colName}`, error);
+                    });
+                    this._unsubscribes.push(unsub);
                 };
-                try {
-                    const [inquiries, bookings, employees] = await Promise.all([
-                        snap('inquiries'), snap('bookings'), snap('users')
-                    ]);
-                    Storage.replaceAll({ inquiries, bookings, employees });
-                } catch (e) {
-                    console.warn('Firestore pull failed', e);
-                    if (e.message && e.message.includes("not found")) {
-                        Utils.showToast("Database Not Found", "Firestore database is still setting up or missing. If you just created it, please wait a few minutes and refresh.", "destructive");
-                    }
-                }
+
+                listen('inquiries', 'inquiries');
+                listen('bookings', 'bookings');
+                listen('users', 'employees');
             },
 
             async saveDoc(col, id, data) {
