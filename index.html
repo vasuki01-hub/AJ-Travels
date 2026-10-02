@@ -2642,10 +2642,8 @@
                         gdsPNR: document.getElementById('gPNR').value,
                         bookingDetails: document.getElementById('details').value,
                         paymentStatus: payStatus,
-                        paidAmount,
-                        partialPayments: partialPayments.length ? partialPayments : undefined,
-                        amount: parseFloat(document.getElementById('amt').value),
-                        salesAmount: parseFloat(document.getElementById('salesAmt').value),
+                        amount: parseFloat(document.getElementById('amt').value) || 0,
+                        salesAmount: parseFloat(document.getElementById('salesAmt').value) || 0,
                         currency: document.getElementById('cur').value,
                         paymentMode,
                         remarks: document.getElementById('payRemarks').value,
@@ -2656,6 +2654,8 @@
                         travelDate: inq.travelDate,
                         inquiryFor: inq.inquiryFor
                     };
+                    if (paidAmount !== undefined && !Number.isNaN(paidAmount)) bk.paidAmount = paidAmount;
+                    if (partialPayments && partialPayments.length > 0) bk.partialPayments = partialPayments;
                     Storage.saveBooking(bk);
                     inq.status = 'Successful';
                     inq.closingDate = issuedDate;
