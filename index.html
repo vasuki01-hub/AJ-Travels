@@ -1581,7 +1581,7 @@
 
                         // Automatically refresh the current view with the new data
                         const page = window.location.hash.slice(1) || 'dashboard';
-                        if (['dashboard', 'inquiries', 'bookings', 'employees'].includes(page)) {
+                        if (['dashboard', 'inquiries', 'my-bookings', 'employees', 'details', 'reports'].includes(page)) {
                             Router.navigate(page);
                         }
                     }, (error) => {
@@ -3216,14 +3216,17 @@
                 if (nav?.dataset?.page) Router.navigate(nav.dataset.page);
             });
         });
-        window.addEventListener('firebase-ready', async () => {
+        window.addEventListener('firebase-ready', () => {
             const u = Auth.getUser();
-            if (u?.source === 'firebase') {
-                // Restore firebase user reference from auth state
-                if (window.Firebase?.auth?.currentUser) {
-                    Auth.firebaseUser = window.Firebase.auth.currentUser;
-                }
-                await FirestoreSync.init();
+            if (u?.source === 'firebase' && window.Firebase?.auth) {
+                // Wait for Firebase to fully restore the auth session before listening to the database
+                // If we listen before auth is restored, Firestore denies permission and kills the listener!
+                window.Firebase.onAuthStateChanged(window.Firebase.auth, (user) => {
+                    if (user) {
+                        Auth.firebaseUser = user;
+                        FirestoreSync.init();
+                    }
+                });
             }
         });
     </script>
