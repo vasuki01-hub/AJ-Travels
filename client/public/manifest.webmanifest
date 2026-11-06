@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "AJ Tours & Travel — Employee Travel Desk",
+  "short_name": "AJ Travel",
+  "description": "AJ Tours & Travel employee enquiry and booking portal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1677e8",
+  "icons": [
+    {
+      "src": "/aj-mark-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/aj-mark-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/aj-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
